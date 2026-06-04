@@ -111,10 +111,6 @@ export default function Sidebar({ role = "USER" }) {
           </svg>
           <span>256-bit TLS · SOC 2 aligned</span>
         </div>
-        <div className="rounded-lg bg-slate-800/50 p-3 text-[10px] leading-relaxed text-slate-500 ring-1 ring-inset ring-slate-700/50">
-          <span className="font-semibold text-slate-300">Demonstration environment.</span> Holdings and
-          transfers are simulated. ACATS routing is illustrative only.
-        </div>
       </div>
     </aside>
   );
