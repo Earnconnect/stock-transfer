@@ -1,0 +1,20 @@
+/node_modules
+/.next
+/out
+/build
+.DS_Store
+*.pem
+
+# Env (never commit secrets)
+.env
+.env*.local
+
+# Logs
+npm-debug.log*
+
+# Vercel
+.vercel
+
+# Prisma (legacy local SQLite — app now uses Postgres)
+/prisma/dev.db
+/prisma/dev.db-journal

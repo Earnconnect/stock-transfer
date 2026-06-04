@@ -1,0 +1,158 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --grid: rgba(15, 23, 42, 0.04);
+}
+
+@layer base {
+  body {
+    @apply bg-slate-100 text-slate-900 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "tnum";
+  }
+  /* Tabular numbers for all financial figures */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .card {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm;
+  }
+  .card-pad {
+    @apply rounded-xl border border-slate-200 bg-white shadow-sm p-5;
+  }
+  .label-xs {
+    @apply text-[11px] font-semibold uppercase tracking-wider text-slate-400;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-brand-700 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-brand-800 focus:outline-none focus:ring-2 focus:ring-brand-500/40 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed;
+  }
+  .field {
+    @apply w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30;
+  }
+}
+
+/* Subtle dotted background for the official "console" feel */
+.bg-grid {
+  background-image: radial-gradient(var(--grid) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Thin scrollbar for tables */
+.scroll-thin::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.scroll-thin::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full;
+}
+.scroll-thin::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-up {
+  animation: fadeUp 0.35s ease-out both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.animate-fade {
+  animation: fadeIn 0.25s ease-out both;
+}
+
+/* Modal pop-in */
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.92) translateY(8px); }
+  60% { transform: scale(1.01); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+.animate-pop {
+  animation: popIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Sequential list item entrance */
+@keyframes stepIn {
+  from { opacity: 0; transform: translateX(-6px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.animate-step {
+  animation: stepIn 0.3s ease-out both;
+}
+
+/* Biometric scan sweep (face capture) */
+@keyframes scanSweep {
+  0% { transform: translateY(-130%); opacity: 0; }
+  15% { opacity: 1; }
+  85% { opacity: 1; }
+  100% { transform: translateY(130%); opacity: 0; }
+}
+.animate-scan {
+  animation: scanSweep 2.2s ease-in-out infinite;
+}
+
+/* Animated SVG checkmark (success) */
+@keyframes drawCheck {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes drawCircle {
+  to { stroke-dashoffset: 0; }
+}
+.check-circle {
+  stroke-dasharray: 166;
+  stroke-dashoffset: 166;
+  animation: drawCircle 0.5s ease-out forwards;
+}
+.check-mark {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: drawCheck 0.4s 0.45s ease-out forwards;
+}
+
+/* Progress bar that fills to a target width on mount (--w set inline) */
+@keyframes barFill {
+  from { width: 0; }
+  to { width: var(--w, 0%); }
+}
+.bar-fill {
+  width: var(--w, 0%);
+  animation: barFill 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Soft pulsing ring for the active processing step */
+@keyframes softPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.animate-soft-pulse {
+  animation: softPulse 1.2s ease-in-out infinite;
+}
+
+/* Indeterminate progress bar */
+@keyframes indeterminate {
+  0% { left: -40%; width: 40%; }
+  50% { left: 30%; width: 45%; }
+  100% { left: 100%; width: 40%; }
+}
+.progress-indeterminate::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -40%;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, theme(colors.brand.400), theme(colors.brand.700));
+  animation: indeterminate 1.4s ease-in-out infinite;
+}
