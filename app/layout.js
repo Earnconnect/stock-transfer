@@ -1,5 +1,6 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
+import Splash from "@/components/Splash";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -37,7 +38,10 @@ export const viewport = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="font-sans">{children}</body>
+      <body className="font-sans">
+        <Splash />
+        {children}
+      </body>
     </html>
   );
 }
