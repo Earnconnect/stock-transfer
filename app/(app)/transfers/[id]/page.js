@@ -26,18 +26,18 @@ export default async function TrackTransferPage({ params }) {
 
   return (
     <main className="bg-grid min-h-full">
-      <div className="p-6 max-w-4xl mx-auto space-y-5">
+      <div className="p-4 sm:p-6 max-w-4xl mx-auto space-y-4 sm:space-y-5">
         <Link href="/transfers" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800">
           <span aria-hidden>←</span> Back to history
         </Link>
 
         {/* Header */}
         <div className="card overflow-hidden animate-fade-up">
-          <div className="bg-gradient-to-r from-slate-900 via-brand-900 to-brand-800 px-6 py-6 text-white">
+          <div className="bg-gradient-to-r from-slate-900 via-brand-900 to-brand-800 px-5 py-5 sm:px-6 sm:py-6 text-white">
             <div className="flex flex-wrap items-start justify-between gap-4">
-              <div>
+              <div className="min-w-0">
                 <div className="text-[11px] uppercase tracking-wider text-white/60">Tracking reference</div>
-                <div className="mt-0.5 font-mono text-xl font-semibold tracking-wide">{transfer.reference}</div>
+                <div className="mt-0.5 font-mono text-lg sm:text-xl font-semibold tracking-wide break-all">{transfer.reference}</div>
                 <div className="mt-2 flex items-center gap-2">
                   <StatusBadge status={transfer.status} size="lg" />
                   <span className="rounded-md bg-white/10 px-2 py-0.5 text-[11px] font-semibold ring-1 ring-inset ring-white/20">

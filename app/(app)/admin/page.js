@@ -14,10 +14,10 @@ export default async function AdminOverviewPage() {
 
   return (
     <main className="bg-grid min-h-full">
-      <div className="p-6 space-y-6">
+      <div className="page">
         {/* Banner */}
         <div className="card overflow-hidden">
-          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-brand-900 px-6 py-6 text-white flex items-center justify-between">
+          <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-brand-900 px-5 py-5 sm:px-6 sm:py-6 text-white flex items-center justify-between gap-3">
             <div>
               <div className="flex items-center gap-2 text-xs text-white/70">
                 <span className="rounded-md bg-amber-500/20 px-2 py-0.5 font-semibold text-amber-300 ring-1 ring-inset ring-amber-400/30">ADMIN</span>
@@ -34,7 +34,7 @@ export default async function AdminOverviewPage() {
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Stat accent label="Total Users" value={stats.users} hint={`${stats.admins} admin${stats.admins === 1 ? "" : "s"}`} />
           <Stat accent label="Linked Accounts" value={stats.accounts} hint="Across all users" />
           <Stat accent label="Transfer Requests" value={stats.transfers} hint={`${stats.pending} pending review`} />

@@ -64,7 +64,7 @@ export default function LinkAccountForm({ defaultHolder = "", catalog = [] }) {
 
   return (
     <div className="space-y-4">
-      <div className="card p-6">
+      <div className="card p-4 sm:p-6">
         <h2 className="font-semibold text-slate-900">Account to link</h2>
         <p className="mt-1 text-sm text-slate-500">Connect an existing brokerage account so you can transfer to and from it.</p>
 
@@ -105,7 +105,7 @@ export default function LinkAccountForm({ defaultHolder = "", catalog = [] }) {
       </div>
 
       {/* Holdings */}
-      <div className="card p-6">
+      <div className="card p-4 sm:p-6">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="font-semibold text-slate-900">Current holdings</h2>

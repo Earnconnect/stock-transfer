@@ -8,7 +8,7 @@ export default async function LinkAccountPage() {
   const catalog = await getActiveStocks();
   return (
     <main className="bg-grid min-h-full">
-      <div className="p-6 max-w-3xl mx-auto space-y-5">
+      <div className="p-4 sm:p-6 max-w-3xl mx-auto space-y-4 sm:space-y-5">
         <Link href="/ira" className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-800">
           <span aria-hidden>←</span> Back to accounts
         </Link>

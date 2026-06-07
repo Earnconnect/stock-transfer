@@ -19,7 +19,7 @@ export default async function AdminTransfersPage() {
 
   return (
     <main className="bg-grid min-h-full">
-      <div className="p-6 space-y-6">
+      <div className="page">
         {transfers.length === 0 && (
           <div className="card-pad text-center text-sm text-slate-400 py-12">No transfer requests have been submitted yet.</div>
         )}

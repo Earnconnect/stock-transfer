@@ -14,7 +14,7 @@ export default async function AdminUsersPage() {
 
   return (
     <main className="bg-grid min-h-full">
-      <div className="p-6 space-y-6">
+      <div className="page">
         <AddUserForm />
         <section className="card">
           <SectionHeader title={`Users (${users.length})`} />

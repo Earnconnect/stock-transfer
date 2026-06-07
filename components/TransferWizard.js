@@ -131,7 +131,7 @@ export default function TransferWizard({ accounts = [] }) {
 
   return (
     <main className="bg-grid min-h-full">
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-4 sm:p-6 max-w-4xl mx-auto">
         {/* Secure header */}
         <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="flex items-center gap-3">
@@ -472,9 +472,9 @@ function Confirmation({ result, source, destLabel, destShort, value, count, onRe
   return (
     <div className="space-y-4">
       <div className="card overflow-hidden">
-        <div className="bg-gradient-to-r from-brand-800 to-brand-600 px-6 py-7 text-white">
+        <div className="bg-gradient-to-r from-brand-800 to-brand-600 px-5 py-6 sm:px-6 sm:py-7 text-white">
           <div className="flex items-center gap-3">
-            <span className="grid place-items-center h-11 w-11 rounded-full bg-white/15 ring-1 ring-white/30 text-xl">✓</span>
+            <span className="grid place-items-center h-11 w-11 shrink-0 rounded-full bg-white/15 ring-1 ring-white/30 text-xl">✓</span>
             <div>
               <h2 className="text-lg font-semibold">{settled ? "Transfer completed" : "Transfer request submitted"}</h2>
               <p className="text-sm text-white/80">{internal ? "Assets were moved instantly between your accounts." : "Your ACATS request is now in progress."}</p>
@@ -547,7 +547,7 @@ function Radio({ on }) {
 function Card({ title, desc, badge, className = "", children }) {
   return (
     <div className={`card ${className}`}>
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {(title || badge) && (
           <div className="flex items-start justify-between mb-5">
             <div>

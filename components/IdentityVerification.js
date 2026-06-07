@@ -106,7 +106,7 @@ export default function IdentityVerification({ redirectTo = "/" }) {
       </ol>
 
       {step === 0 && (
-        <div className="card p-6 space-y-4">
+        <div className="card p-4 sm:p-6 space-y-4">
           <div>
             <h2 className="font-semibold text-slate-900">Upload a government ID</h2>
             <p className="mt-1 text-sm text-slate-500">Required to comply with KYC / Customer Identification Program rules before moving funds.</p>
@@ -140,7 +140,7 @@ export default function IdentityVerification({ redirectTo = "/" }) {
       )}
 
       {step === 1 && (
-        <div className="card p-6 space-y-4">
+        <div className="card p-4 sm:p-6 space-y-4">
           <div>
             <h2 className="font-semibold text-slate-900">Face verification</h2>
             <p className="mt-1 text-sm text-slate-500">We match a live photo to your ID to confirm it&apos;s really you (liveness check).</p>

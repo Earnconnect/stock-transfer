@@ -168,9 +168,9 @@ function Receipt({ receipt, account, isEarly, onReset }) {
   return (
     <div className="space-y-4 max-w-2xl animate-fade-up">
       <div className="card overflow-hidden">
-        <div className="bg-gradient-to-r from-brand-800 to-brand-600 px-6 py-7 text-white">
+        <div className="bg-gradient-to-r from-brand-800 to-brand-600 px-5 py-6 sm:px-6 sm:py-7 text-white">
           <div className="flex items-center gap-3">
-            <span className="grid place-items-center h-11 w-11 rounded-full bg-white/15 ring-1 ring-white/30 animate-pop">
+            <span className="grid place-items-center h-11 w-11 shrink-0 rounded-full bg-white/15 ring-1 ring-white/30 animate-pop">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-6 w-6"><path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
             </span>
             <div>

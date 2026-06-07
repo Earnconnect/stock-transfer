@@ -25,7 +25,7 @@ export default async function WithdrawPage() {
 
   return (
     <main className="bg-grid min-h-full">
-      <div className="p-6 space-y-6">
+      <div className="page">
         <WithdrawForm accounts={accounts} />
 
         {withdrawals.length > 0 && (

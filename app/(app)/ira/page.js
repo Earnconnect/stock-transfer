@@ -21,9 +21,9 @@ export default async function IraPage() {
 
   return (
     <main className="bg-grid min-h-full">
-      <div className="p-6 space-y-6">
+      <div className="page">
         <div className="card overflow-hidden">
-          <div className="bg-gradient-to-br from-slate-900 via-brand-900 to-brand-800 p-6 text-white">
+          <div className="bg-gradient-to-br from-slate-900 via-brand-900 to-brand-800 p-5 sm:p-6 text-white">
             <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
               <div>
                 <div className="text-sm text-white/70">Total retirement value · {accounts.length} accounts</div>

@@ -46,7 +46,7 @@ export default function StocksTable({ stocks }) {
   }, [stocks]);
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         <MiniStat label="Total Securities" value={stocks.length} dot="bg-brand-500" />
         <MiniStat label="IRS Approved" value={counts.approved} dot="bg-emerald-500" />

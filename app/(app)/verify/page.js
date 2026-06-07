@@ -12,7 +12,7 @@ export default async function VerifyPage({ searchParams }) {
 
   return (
     <main className="bg-grid min-h-full">
-      <div className="p-6 max-w-2xl mx-auto space-y-5">
+      <div className="p-4 sm:p-6 max-w-2xl mx-auto space-y-4 sm:space-y-5">
         <div>
           <h1 className="text-xl font-semibold text-slate-900">Identity verification</h1>
           <p className="text-sm text-slate-500">Federal Customer Identification Program (CIP / KYC) checks are required before transfers or withdrawals.</p>

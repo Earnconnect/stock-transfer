@@ -23,8 +23,8 @@ export default async function AdminAccountsPage() {
 
   return (
     <main className="bg-grid min-h-full">
-      <div className="p-6 space-y-6">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="page">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Stat accent label="Accounts" value={accounts.length} hint="Across all members" />
           <Stat accent label="Total AUM" value={formatMoney(totalValue)} hint="Holdings + cash" />
           <Stat accent label="Total Cash" value={formatMoney(totalCash)} hint="Across accounts" />

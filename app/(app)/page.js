@@ -29,7 +29,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="bg-grid min-h-full">
-      <div className="p-6 space-y-6">
+      <div className="page">
         {user.kycStatus !== "VERIFIED" && (
           <Link href="/verify" className="flex items-center gap-3 rounded-xl bg-amber-50 px-5 py-4 ring-1 ring-inset ring-amber-600/20 hover:bg-amber-100/70 transition">
             <span className="grid place-items-center h-9 w-9 rounded-lg bg-amber-500 text-white">
@@ -45,26 +45,26 @@ export default async function DashboardPage() {
 
         {/* Hero */}
         <section className="card overflow-hidden">
-          <div className="relative bg-gradient-to-br from-slate-900 via-brand-900 to-brand-800 px-6 py-7 text-white">
+          <div className="relative bg-gradient-to-br from-slate-900 via-brand-900 to-brand-800 px-5 py-6 sm:px-6 sm:py-7 text-white">
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
               <div>
                 <div className="flex items-center gap-2 text-white/70 text-xs">
                   <Seal tone="brand">Premier</Seal>
                   <span>Welcome back, {firstName}</span>
                 </div>
-                <div className="mt-2 text-4xl font-semibold tracking-tight tnum">{formatMoney(totalValue)}</div>
+                <div className="mt-2 text-3xl sm:text-4xl font-semibold tracking-tight tnum">{formatMoney(totalValue)}</div>
                 <div className="mt-1 text-sm text-emerald-300 font-medium">▲ 1.84% today · {accounts.length} linked accounts</div>
               </div>
-              <div className="flex gap-3">
-                <Link href="/transfer" className="rounded-lg bg-white px-5 py-2.5 text-sm font-semibold text-brand-800 shadow hover:bg-slate-100 transition">Initiate Transfer</Link>
-                <Link href="/link" className="rounded-lg bg-white/10 px-5 py-2.5 text-sm font-semibold text-white ring-1 ring-inset ring-white/25 hover:bg-white/20 transition">+ Link account</Link>
+              <div className="flex gap-2 sm:gap-3">
+                <Link href="/transfer" className="flex-1 md:flex-none text-center rounded-lg bg-white px-4 sm:px-5 py-2.5 text-sm font-semibold text-brand-800 shadow hover:bg-slate-100 transition">Initiate Transfer</Link>
+                <Link href="/link" className="flex-1 md:flex-none text-center rounded-lg bg-white/10 px-4 sm:px-5 py-2.5 text-sm font-semibold text-white ring-1 ring-inset ring-white/25 hover:bg-white/20 transition">+ Link</Link>
               </div>
             </div>
           </div>
         </section>
 
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
           <Stat accent label="Linked Accounts" value={accounts.length} hint="IRA accounts on file" />
           <Stat accent label="IRS-Approved Assets" value={`${approvedCount} / ${stocks.length}`} hint="Eligible for IRA custody" />
           <Stat accent label="Transfer Requests" value={transfers.length} hint={`${transfers.filter((t) => t.status === "PENDING").length} pending`} />

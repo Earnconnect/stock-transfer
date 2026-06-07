@@ -17,9 +17,9 @@ export function Stat({ label, value, hint, accent }) {
   return (
     <div className="card-pad relative overflow-hidden">
       {accent && <span className="absolute inset-x-0 top-0 h-0.5 bg-brand-600" />}
-      <div className="label-xs">{label}</div>
-      <div className="mt-2 text-2xl font-semibold text-slate-900 tnum">{value}</div>
-      {hint && <div className="mt-1 text-xs text-slate-400">{hint}</div>}
+      <div className="label-xs truncate">{label}</div>
+      <div className="mt-1.5 sm:mt-2 text-xl sm:text-2xl font-semibold text-slate-900 tnum truncate">{value}</div>
+      {hint && <div className="mt-1 text-[11px] sm:text-xs text-slate-400 truncate">{hint}</div>}
     </div>
   );
 }
