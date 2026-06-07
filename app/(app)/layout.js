@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import Topbar from "@/components/Topbar";
+import MobileNav from "@/components/MobileNav";
 import { getCurrentUser } from "@/lib/auth";
 
 // These routes are per-user and read the database — never prerender them at
@@ -18,8 +19,9 @@ export default async function AppLayout({ children }) {
       <Sidebar role={user.role} />
       <div className="flex-1 md:pl-64 flex flex-col min-w-0">
         <Topbar user={safeUser} />
-        <div className="flex-1">{children}</div>
+        <div className="flex-1 pb-[calc(4.5rem+env(safe-area-inset-bottom))] md:pb-0">{children}</div>
       </div>
+      <MobileNav role={user.role} user={safeUser} />
     </div>
   );
 }

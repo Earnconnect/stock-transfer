@@ -36,13 +36,19 @@ export default function Topbar({ user }) {
   const isAdmin = user?.role === "ADMIN";
 
   return (
-    <header className="sticky top-0 z-10 flex items-center justify-between h-16 px-6 bg-white/90 backdrop-blur border-b border-slate-200">
-      <div>
-        <div className="flex items-center gap-2">
-          <h1 className="text-[15px] font-semibold text-slate-900">{meta.title}</h1>
-          <span className="hidden sm:inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">Live</span>
+    <header className="sticky top-0 z-10 flex items-center justify-between h-16 px-4 sm:px-6 bg-white/90 backdrop-blur border-b border-slate-200 safe-top">
+      <div className="flex items-center gap-2.5 min-w-0">
+        {/* Brand mark — mobile only (sidebar is hidden) */}
+        <span className="md:hidden grid place-items-center h-9 w-9 shrink-0 rounded-xl bg-gradient-to-br from-brand-500 to-brand-700 text-white">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5"><path d="M3 12l9-9 9 9M5 10v10h14V10" strokeLinecap="round" strokeLinejoin="round" /></svg>
+        </span>
+        <div className="min-w-0">
+          <div className="flex items-center gap-2">
+            <h1 className="text-[15px] font-semibold text-slate-900 truncate">{meta.title}</h1>
+            <span className="hidden sm:inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-500">Live</span>
+          </div>
+          <p className="text-xs text-slate-400 truncate">{meta.subtitle}</p>
         </div>
-        <p className="text-xs text-slate-400">{meta.subtitle}</p>
       </div>
 
       <div className="flex items-center gap-3">
@@ -69,7 +75,7 @@ export default function Topbar({ user }) {
           </div>
         </div>
 
-        <form action={logoutAction}>
+        <form action={logoutAction} className="hidden md:block">
           <button type="submit" title="Sign out" className="grid place-items-center h-9 w-9 rounded-lg border border-slate-200 text-slate-400 hover:text-slate-700 hover:bg-slate-50 transition">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-[18px] w-[18px]">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9" />
