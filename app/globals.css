@@ -148,6 +148,23 @@
   animation: barFill 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Attention-grabbing pulse for critical warnings */
+@keyframes attentionPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.55); }
+  50% { box-shadow: 0 0 0 7px rgba(244, 63, 94, 0); }
+}
+.animate-attention {
+  animation: attentionPulse 1.5s ease-out infinite;
+}
+@keyframes wiggle {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(-9deg); }
+  75% { transform: rotate(9deg); }
+}
+.animate-wiggle {
+  animation: wiggle 0.9s ease-in-out infinite;
+}
+
 /* Soft pulsing ring for the active processing step */
 @keyframes softPulse {
   0%, 100% { opacity: 1; }

@@ -451,9 +451,16 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
                           </div>
                         )}
                         {freeAllowed && insurance === "none" && (
-                          <div className="mt-2.5 flex gap-2 rounded-lg bg-rose-100/70 p-2.5 text-[11px] leading-relaxed text-rose-900 ring-1 ring-inset ring-rose-500/40">
-                            <WarningIcon className="h-4 w-4 shrink-0 text-rose-600" />
-                            <span><strong>You are not covered.</strong> If assets are lost, delayed, or fail to settle during the transfer, you bear the full risk with no reimbursement. We strongly recommend adding protection.</span>
+                          <div className="mt-3 animate-attention rounded-xl bg-gradient-to-r from-rose-600 to-red-600 p-3.5 text-white shadow-lg shadow-rose-500/30">
+                            <div className="flex items-center gap-2">
+                              <span className="grid place-items-center h-7 w-7 shrink-0 rounded-full bg-white/20 ring-1 ring-white/40">
+                                <WarningIcon className="h-4 w-4 text-white animate-wiggle" />
+                              </span>
+                              <span className="font-bold text-sm uppercase tracking-wide">You are not covered</span>
+                            </div>
+                            <p className="mt-2 text-[11px] leading-relaxed text-rose-50">
+                              If your assets are lost, delayed, or fail to settle during the transfer, you bear the <strong className="text-white">full financial risk with zero reimbursement</strong>. Adding protection is strongly recommended.
+                            </p>
                           </div>
                         )}
                       </div>
