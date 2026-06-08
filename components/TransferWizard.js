@@ -415,8 +415,20 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
               </Card>
 
               {/* Transfer insurance */}
-              <Card title="Protect this transfer" desc="Optional insurance covers your assets against loss or settlement failure during the transfer."
+              <Card title="Protect this transfer"
+                desc={freeAllowed ? "Optional insurance covers your assets against loss or settlement failure during the transfer." : "Protection is required on this transfer. Choose Standard or Premium to continue."}
                 badge={insurance !== "none" ? <Seal tone="green">Protected</Seal> : <Seal tone="gold">Action needed</Seal>}>
+                {!freeAllowed && (
+                  <div className="mb-4 flex gap-3 rounded-xl bg-brand-50 p-4 ring-1 ring-inset ring-brand-600/15">
+                    <ShieldCheck className="h-5 w-5 shrink-0 text-brand-700" />
+                    <div className="text-xs leading-relaxed text-slate-600">
+                      <span className="font-semibold text-slate-900">Why protection is required.</span> High-value transfers above {formatMoney(FREE_INSURANCE_LIMIT)} carry
+                      greater exposure to market movement, settlement delays, and the risk of loss while your assets move between
+                      custodians. To make sure your holdings are fully reimbursable if anything goes wrong before settlement completes,
+                      insurance is mandatory on transfers of this size — so a covered position is never left unprotected in transit.
+                    </div>
+                  </div>
+                )}
                 <div className="space-y-2.5">
                   {/* No protection (free, risky) — unavailable over the free limit */}
                   <button onClick={() => freeAllowed && setInsurance("none")} disabled={!freeAllowed}
