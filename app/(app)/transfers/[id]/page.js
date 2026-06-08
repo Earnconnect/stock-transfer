@@ -9,7 +9,8 @@ import { requireUserRecord } from "@/lib/auth";
 import { getUserTransfer, parseItems } from "@/lib/queries";
 import { stagesFor, progressFor } from "@/lib/settlement";
 import { getStockMap } from "@/lib/catalog";
-import { getBrokerage, getIraType, formatMoney, formatMoneyExact } from "@/lib/data";
+import { getBrokerage, getIraType, getInsurancePlan, formatMoney, formatMoneyExact } from "@/lib/data";
+import { ShieldCheck } from "@/components/ui";
 
 export default async function TrackTransferPage({ params }) {
   const { id } = await params;
@@ -135,6 +136,28 @@ export default async function TrackTransferPage({ params }) {
                 </tr>
               </tfoot>
             </table>
+          </div>
+        </section>
+
+        {/* Insurance / protection */}
+        <section className="card animate-fade-up" style={{ animationDelay: "200ms" }}>
+          <div className="p-5 flex items-center gap-4">
+            <span className={`grid place-items-center h-11 w-11 rounded-xl shrink-0 ${transfer.insured ? "bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-600/20" : "bg-slate-100 text-slate-400"}`}>
+              <ShieldCheck className="h-6 w-6" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <h2 className="font-semibold text-slate-900">Transfer protection</h2>
+                <Seal tone={transfer.insured ? "green" : "slate"}>{transfer.insured ? "Insured" : "Not insured"}</Seal>
+              </div>
+              {transfer.insured ? (
+                <p className="mt-0.5 text-sm text-slate-500">
+                  {getInsurancePlan(transfer.insurancePlan).name} · covered up to <span className="font-medium text-slate-700">{formatMoney(transfer.coverageAmount)}</span> · premium {formatMoneyExact(transfer.insurancePremium)}
+                </p>
+              ) : (
+                <p className="mt-0.5 text-sm text-slate-500">This transfer was not insured.</p>
+              )}
+            </div>
           </div>
         </section>
 

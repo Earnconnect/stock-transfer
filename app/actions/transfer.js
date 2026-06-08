@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { settleTransfer } from "@/lib/settlement";
 import { getStockMap } from "@/lib/catalog";
-import { getBrokerage, getIraType } from "@/lib/data";
+import { getBrokerage, getIraType, getInsurancePlan, insurancePremium } from "@/lib/data";
 
 function genReference(account, dtc, internal) {
   const now = new Date();
@@ -71,6 +71,12 @@ export async function createTransferAction(payload) {
   });
   const totalValue = items.reduce((s, i) => s + i.value, 0);
 
+  // Insurance — validate the plan and recompute the premium server-side.
+  const plan = getInsurancePlan(payload?.insurance);
+  const insured = plan.id !== "none";
+  const insurancePremiumAmt = insured ? insurancePremium(plan.id, totalValue) : 0;
+  const coverageAmount = insured ? totalValue : 0;
+
   const dtc = getBrokerage(destBrokerage)?.dtc || "0000";
   const reference = genReference(source.accountNumber, dtc, isInternal);
 
@@ -89,6 +95,10 @@ export async function createTransferAction(payload) {
       status: "PENDING",
       totalValue,
       items: JSON.stringify(items),
+      insured,
+      insurancePlan: plan.id,
+      insurancePremium: insurancePremiumAmt,
+      coverageAmount,
     },
   });
 
@@ -103,5 +113,5 @@ export async function createTransferAction(payload) {
   revalidatePath("/transfers");
   revalidatePath("/ira");
   revalidatePath("/admin/transfers");
-  return { ok: true, id: created.id, reference, status, method: isInternal ? "INTERNAL" : "EXTERNAL", totalValue, count: items.length };
+  return { ok: true, id: created.id, reference, status, method: isInternal ? "INTERNAL" : "EXTERNAL", totalValue, count: items.length, insured, coverageAmount, insurancePremium: insurancePremiumAmt };
 }

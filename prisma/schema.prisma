@@ -115,6 +115,11 @@ model Transfer {
   status          String   @default("PENDING") // PENDING | APPROVED | REJECTED | SETTLED
   totalValue      Float
   items           String   // JSON: [{ symbol, shares, value }]
+  // Optional transfer insurance the user can purchase to protect the transfer.
+  insured          Boolean @default(false)
+  insurancePlan    String? // none | standard | premium
+  insurancePremium Float   @default(0)
+  coverageAmount   Float   @default(0)
   note            String?  // admin note on reject/approve
   createdAt       DateTime @default(now())
   approvedAt      DateTime?

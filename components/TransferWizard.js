@@ -12,6 +12,9 @@ const STAGES_EXTERNAL = ["Validating positions for transfer", "Filing ACATS requ
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 import {
   BROKERAGES,
+  INSURANCE_PLANS,
+  getInsurancePlan,
+  insurancePremium,
   getBrokerage,
   getIraType,
   positionValue,
@@ -31,6 +34,7 @@ export default function TransferWizard({ accounts = [] }) {
   const [destId, setDestId] = useState(""); // external brokerage
   const [destAccountId, setDestAccountId] = useState(""); // internal account
   const [recipient, setRecipient] = useState({ holder: "", account: "", type: "", authorize: false, signature: "" });
+  const [insurance, setInsurance] = useState("none");
   const [submitError, setSubmitError] = useState("");
   const [result, setResult] = useState(null);
   const [proc, setProc] = useState({ open: false, step: 0, status: "running" });
@@ -64,6 +68,7 @@ export default function TransferWizard({ accounts = [] }) {
     transferType === "full" ? source.positions : source.positions.filter((p) => selected[p.symbol]);
   const transferValue = selectedPositions.reduce((sum, p) => sum + positionValue(p), 0);
   const hasIneligible = selectedPositions.some((p) => !isApproved(p.assetType));
+  const premium = insurancePremium(insurance, transferValue);
 
   function toggle(symbol) {
     setSelected((prev) => ({ ...prev, [symbol]: !prev[symbol] }));
@@ -74,7 +79,7 @@ export default function TransferWizard({ accounts = [] }) {
   function reset() {
     setStep(0); setSelected({}); setMethod(""); setDestId(""); setDestAccountId("");
     setTransferType("full"); setRecipient({ holder: "", account: "", type: "", authorize: false, signature: "" });
-    setResult(null); setSubmitError("");
+    setInsurance("none"); setResult(null); setSubmitError("");
   }
 
   const recipientValid = recipient.holder.trim().length > 2 && recipient.account.trim().length >= 4 && recipient.type;
@@ -111,6 +116,7 @@ export default function TransferWizard({ accounts = [] }) {
       destAccountId: isInternal ? destAccountId : undefined,
       destBrokerage: isInternal ? undefined : destId,
       recipient: isInternal ? undefined : { holder: recipient.holder, account: recipient.account, type: recipient.type },
+      insurance,
     });
     for (let i = 0; i < procStages.length; i++) {
       setProc((p) => ({ ...p, step: i }));
@@ -402,6 +408,55 @@ export default function TransferWizard({ accounts = [] }) {
                 </div>
               </Card>
 
+              {/* Transfer insurance */}
+              <Card title="Protect this transfer" desc="Optional insurance covers your assets against loss or settlement failure during the transfer."
+                badge={insurance !== "none" ? <Seal tone="green">Protected</Seal> : <Seal tone="slate">Optional</Seal>}>
+                <div className="space-y-2.5">
+                  {INSURANCE_PLANS.map((plan) => {
+                    const active = insurance === plan.id;
+                    const cost = insurancePremium(plan.id, transferValue);
+                    return (
+                      <button key={plan.id} onClick={() => setInsurance(plan.id)}
+                        className={`w-full text-left rounded-xl border p-4 transition ${active ? "border-brand-500 ring-2 ring-brand-500/20 bg-brand-50/40" : "border-slate-200 hover:bg-slate-50"}`}>
+                        <div className="flex items-start gap-3">
+                          <span className={`mt-0.5 grid place-items-center h-4 w-4 rounded-full border-2 shrink-0 ${active ? "border-brand-600" : "border-slate-300"}`}>
+                            {active && <span className="h-2 w-2 rounded-full bg-brand-600" />}
+                          </span>
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="font-semibold text-slate-900 text-sm flex items-center gap-1.5">
+                                {plan.id !== "none" && <ShieldCheck className="h-4 w-4 text-brand-600" />}
+                                {plan.name}
+                              </span>
+                              <span className="text-sm font-semibold text-slate-900 tnum shrink-0">
+                                {plan.id === "none" ? "Free" : `+${formatMoneyExact(cost)}`}
+                              </span>
+                            </div>
+                            <p className="mt-0.5 text-xs text-slate-500">{plan.blurb}</p>
+                            {plan.features.length > 0 && (
+                              <ul className="mt-2 flex flex-wrap gap-1.5">
+                                {plan.features.map((f) => (
+                                  <li key={f} className="rounded-md bg-white px-2 py-0.5 text-[11px] text-slate-600 ring-1 ring-inset ring-slate-200">{f}</li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {insurance !== "none" && (
+                  <div className="mt-4 flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-3 ring-1 ring-inset ring-emerald-600/20">
+                    <div className="text-sm">
+                      <div className="font-semibold text-emerald-900">Coverage up to {formatMoney(transferValue)}</div>
+                      <div className="text-xs text-emerald-700">{getInsurancePlan(insurance).name} · premium {formatMoneyExact(premium)}</div>
+                    </div>
+                    <ShieldCheck className="h-6 w-6 text-emerald-600" />
+                  </div>
+                )}
+              </Card>
+
               <Card title="Authorization & e-signature">
                 <label className="flex gap-3 items-start cursor-pointer">
                   <input type="checkbox" checked={recipient.authorize} onChange={(e) => setR({ authorize: e.target.checked })} className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
@@ -505,6 +560,7 @@ function Confirmation({ result, source, destLabel, destShort, value, count, onRe
       <div className="flex flex-wrap items-center gap-2">
         <Seal tone="slate">{count} positions</Seal>
         <Seal tone={internal ? "brand" : "gold"}>{internal ? "Internal" : "External · ACATS"}</Seal>
+        {result?.insured && <Seal tone="green">Insured · {formatMoney(result.coverageAmount)} covered</Seal>}
         <div className="ml-auto flex items-center gap-2">
           <button onClick={onReset} className="btn-ghost">New transfer</button>
           {result?.id && <a href={`/transfers/${result.id}`} className="btn-primary">Track this transfer →</a>}
