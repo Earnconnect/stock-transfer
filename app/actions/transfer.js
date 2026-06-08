@@ -81,7 +81,7 @@ export async function createTransferAction(payload) {
 
   // Transfers over the free limit must be insured.
   if (totalValue > FREE_INSURANCE_LIMIT && !insured) {
-    return { error: `Transfers over $${FREE_INSURANCE_LIMIT} require insurance protection.` };
+    return { error: `Transfers over $${FREE_INSURANCE_LIMIT.toLocaleString()} require insurance protection.` };
   }
   // The premium must be paid from the source account's cash before processing.
   if (insured && source.cashBalance < insurancePremiumAmt) {
