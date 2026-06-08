@@ -12,6 +12,7 @@ const STAGES_EXTERNAL = ["Validating positions for transfer", "Filing ACATS requ
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 import {
   BROKERAGES,
+  FREE_INSURANCE_LIMIT,
   insurancePlanName,
   getBrokerage,
   getIraType,
@@ -68,6 +69,12 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
   const hasIneligible = selectedPositions.some((p) => !isApproved(p.assetType));
   const selectedPlan = insurancePlans.find((p) => p.id === insurance);
   const premium = selectedPlan ? selectedPlan.price : 0;
+  // Insurance rules: transfers over the free limit must be insured; if a plan is
+  // chosen its premium must be payable from the source account's cash.
+  const freeAllowed = transferValue <= FREE_INSURANCE_LIMIT;
+  const sourceCash = source?.cashBalance || 0;
+  const premiumPayable = insurance === "none" ? true : sourceCash >= premium;
+  const insuranceValid = (insurance !== "none" || freeAllowed) && premiumPayable;
 
   function toggle(symbol) {
     setSelected((prev) => ({ ...prev, [symbol]: !prev[symbol] }));
@@ -91,7 +98,7 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
     (step === 1 && selectedPositions.length > 0) ||
     (step === 2 && method && (method === "external" || others.length > 0)) ||
     (step === 3 && destValid) ||
-    (step === 4 && authorizeValid);
+    (step === 4 && authorizeValid && insuranceValid);
 
   function next() {
     if (step === 2 && method === "external") {
@@ -411,24 +418,29 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
               <Card title="Protect this transfer" desc="Optional insurance covers your assets against loss or settlement failure during the transfer."
                 badge={insurance !== "none" ? <Seal tone="green">Protected</Seal> : <Seal tone="gold">Action needed</Seal>}>
                 <div className="space-y-2.5">
-                  {/* No protection (free, risky) */}
-                  <button onClick={() => setInsurance("none")}
-                    className={`w-full text-left rounded-xl border p-4 transition ${insurance === "none" ? "border-amber-400 ring-2 ring-amber-400/30 bg-amber-50/60" : "border-slate-200 hover:bg-slate-50"}`}>
+                  {/* No protection (free, risky) — unavailable over the free limit */}
+                  <button onClick={() => freeAllowed && setInsurance("none")} disabled={!freeAllowed}
+                    className={`w-full text-left rounded-xl border p-4 transition ${!freeAllowed ? "border-slate-200 opacity-60 cursor-not-allowed" : insurance === "none" ? "border-rose-400 ring-2 ring-rose-400/30 bg-rose-50/60" : "border-slate-200 hover:bg-slate-50"}`}>
                     <div className="flex items-start gap-3">
-                      <span className={`mt-0.5 grid place-items-center h-4 w-4 rounded-full border-2 shrink-0 ${insurance === "none" ? "border-amber-500" : "border-slate-300"}`}>
-                        {insurance === "none" && <span className="h-2 w-2 rounded-full bg-amber-500" />}
+                      <span className={`mt-0.5 grid place-items-center h-4 w-4 rounded-full border-2 shrink-0 ${insurance === "none" && freeAllowed ? "border-rose-500" : "border-slate-300"}`}>
+                        {insurance === "none" && freeAllowed && <span className="h-2 w-2 rounded-full bg-rose-500" />}
                       </span>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
                           <span className="font-semibold text-slate-900 text-sm flex items-center gap-1.5">
-                            <WarningIcon className="h-4 w-4 text-amber-500" /> No protection
+                            <WarningIcon className="h-4 w-4 text-rose-500" /> No protection
                           </span>
                           <span className="text-sm font-semibold text-slate-500 tnum shrink-0">Free</span>
                         </div>
                         <p className="mt-0.5 text-xs text-slate-500">Proceed without transfer insurance.</p>
-                        {insurance === "none" && (
-                          <div className="mt-2.5 flex gap-2 rounded-lg bg-amber-100/70 p-2.5 text-[11px] leading-relaxed text-amber-900 ring-1 ring-inset ring-amber-500/30">
-                            <WarningIcon className="h-4 w-4 shrink-0 text-amber-600" />
+                        {!freeAllowed && (
+                          <div className="mt-2 inline-flex items-center gap-1.5 rounded-md bg-slate-100 px-2 py-1 text-[11px] font-medium text-slate-600">
+                            <LockIcon className="h-3.5 w-3.5" /> Not available for transfers over {formatMoney(FREE_INSURANCE_LIMIT)} — protection required
+                          </div>
+                        )}
+                        {freeAllowed && insurance === "none" && (
+                          <div className="mt-2.5 flex gap-2 rounded-lg bg-rose-100/70 p-2.5 text-[11px] leading-relaxed text-rose-900 ring-1 ring-inset ring-rose-500/40">
+                            <WarningIcon className="h-4 w-4 shrink-0 text-rose-600" />
                             <span><strong>You are not covered.</strong> If assets are lost, delayed, or fail to settle during the transfer, you bear the full risk with no reimbursement. We strongly recommend adding protection.</span>
                           </div>
                         )}
@@ -467,13 +479,36 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
                     );
                   })}
                 </div>
+                {/* Over-limit, nothing chosen yet */}
+                {!freeAllowed && insurance === "none" && (
+                  <div className="mt-4 flex gap-2 rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700 ring-1 ring-inset ring-rose-600/20">
+                    <WarningIcon className="h-5 w-5 shrink-0" />
+                    <span>Transfers over {formatMoney(FREE_INSURANCE_LIMIT)} require protection. Select Standard or Premium to continue.</span>
+                  </div>
+                )}
+
+                {/* Premium payment — required before the transfer is processed */}
                 {insurance !== "none" && selectedPlan && (
-                  <div className="mt-4 flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-3 ring-1 ring-inset ring-emerald-600/20">
-                    <div className="text-sm">
-                      <div className="font-semibold text-emerald-900">Coverage up to {formatMoney(transferValue)}</div>
-                      <div className="text-xs text-emerald-700">{selectedPlan.name} · premium {formatMoneyExact(premium)}</div>
+                  <div className={`mt-4 rounded-lg px-4 py-3 ring-1 ring-inset ${premiumPayable ? "bg-emerald-50 ring-emerald-600/20" : "bg-rose-50 ring-rose-600/20"}`}>
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="text-sm">
+                        <div className={`font-semibold ${premiumPayable ? "text-emerald-900" : "text-rose-900"}`}>Coverage up to {formatMoney(transferValue)}</div>
+                        <div className={`text-xs ${premiumPayable ? "text-emerald-700" : "text-rose-700"}`}>{selectedPlan.name} · premium {formatMoneyExact(premium)}</div>
+                      </div>
+                      <ShieldCheck className={`h-6 w-6 ${premiumPayable ? "text-emerald-600" : "text-rose-500"}`} />
                     </div>
-                    <ShieldCheck className="h-6 w-6 text-emerald-600" />
+                    <div className="mt-2.5 border-t border-current/10 pt-2.5 flex items-center justify-between text-xs">
+                      <span className="text-slate-600">Charged from {getBrokerage(source.brokerage)?.short} cash · available {formatMoney(sourceCash)}</span>
+                      {premiumPayable
+                        ? <span className="font-semibold text-emerald-700">Payment ready ✓</span>
+                        : <span className="font-semibold text-rose-700">Add {formatMoney(premium - sourceCash)} to pay</span>}
+                    </div>
+                    {!premiumPayable && (
+                      <p className="mt-2 text-[11px] leading-relaxed text-rose-700">
+                        The {formatMoneyExact(premium)} premium must be paid before this transfer can proceed. Add funds to your
+                        {" "}{source.label} account to cover it.
+                      </p>
+                    )}
                   </div>
                 )}
               </Card>
