@@ -15,6 +15,7 @@ const TITLES = {
   "/link": { title: "Link Account", subtitle: "Connect a brokerage account to your profile" },
   "/admin": { title: "Admin · Overview", subtitle: "Platform-wide activity and controls" },
   "/admin/transfers": { title: "Admin · Transfers", subtitle: "Review and action all transfer requests" },
+  "/admin/insurance": { title: "Admin · Insurance", subtitle: "Set transfer-insurance plan pricing" },
   "/admin/accounts": { title: "Admin · Funds & Holdings", subtitle: "Add funds and manage member holdings" },
   "/admin/securities": { title: "Admin · Securities", subtitle: "Manage the tradable securities catalog" },
   "/admin/users": { title: "Admin · Users", subtitle: "Create and manage platform users" },

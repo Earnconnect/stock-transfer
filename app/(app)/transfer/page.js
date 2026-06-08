@@ -2,13 +2,17 @@ import TransferWizard from "@/components/TransferWizard";
 import KycGate from "@/components/KycGate";
 import { requireUserRecord } from "@/lib/auth";
 import { getUserAccounts } from "@/lib/queries";
+import { getInsurancePlans } from "@/lib/insurance";
 
 export default async function TransferPage() {
   const user = await requireUserRecord();
   if (user.kycStatus !== "VERIFIED") {
     return <KycGate next="/transfer" action="initiate a transfer" status={user.kycStatus} />;
   }
-  const accountsRaw = await getUserAccounts(user.id);
+  const [accountsRaw, insurancePlans] = await Promise.all([
+    getUserAccounts(user.id),
+    getInsurancePlans(),
+  ]);
 
   // Pass only plain, serializable fields to the client component.
   const accounts = accountsRaw.map((a) => ({
@@ -25,5 +29,5 @@ export default async function TransferPage() {
     })),
   }));
 
-  return <TransferWizard accounts={accounts} />;
+  return <TransferWizard accounts={accounts} insurancePlans={insurancePlans} />;
 }

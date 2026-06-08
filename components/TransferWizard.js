@@ -12,9 +12,7 @@ const STAGES_EXTERNAL = ["Validating positions for transfer", "Filing ACATS requ
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 import {
   BROKERAGES,
-  INSURANCE_PLANS,
-  getInsurancePlan,
-  insurancePremium,
+  insurancePlanName,
   getBrokerage,
   getIraType,
   positionValue,
@@ -25,7 +23,7 @@ import { isApproved } from "@/lib/irs";
 
 const STEPS = ["Source", "Holdings", "Method", "Destination", "Authorize", "Submitted"];
 
-export default function TransferWizard({ accounts = [] }) {
+export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
   const [step, setStep] = useState(0);
   const [sourceId, setSourceId] = useState(accounts[0]?.id || "");
   const [selected, setSelected] = useState({});
@@ -68,7 +66,8 @@ export default function TransferWizard({ accounts = [] }) {
     transferType === "full" ? source.positions : source.positions.filter((p) => selected[p.symbol]);
   const transferValue = selectedPositions.reduce((sum, p) => sum + positionValue(p), 0);
   const hasIneligible = selectedPositions.some((p) => !isApproved(p.assetType));
-  const premium = insurancePremium(insurance, transferValue);
+  const selectedPlan = insurancePlans.find((p) => p.id === insurance);
+  const premium = selectedPlan ? selectedPlan.price : 0;
 
   function toggle(symbol) {
     setSelected((prev) => ({ ...prev, [symbol]: !prev[symbol] }));
@@ -410,11 +409,36 @@ export default function TransferWizard({ accounts = [] }) {
 
               {/* Transfer insurance */}
               <Card title="Protect this transfer" desc="Optional insurance covers your assets against loss or settlement failure during the transfer."
-                badge={insurance !== "none" ? <Seal tone="green">Protected</Seal> : <Seal tone="slate">Optional</Seal>}>
+                badge={insurance !== "none" ? <Seal tone="green">Protected</Seal> : <Seal tone="gold">Action needed</Seal>}>
                 <div className="space-y-2.5">
-                  {INSURANCE_PLANS.map((plan) => {
+                  {/* No protection (free, risky) */}
+                  <button onClick={() => setInsurance("none")}
+                    className={`w-full text-left rounded-xl border p-4 transition ${insurance === "none" ? "border-amber-400 ring-2 ring-amber-400/30 bg-amber-50/60" : "border-slate-200 hover:bg-slate-50"}`}>
+                    <div className="flex items-start gap-3">
+                      <span className={`mt-0.5 grid place-items-center h-4 w-4 rounded-full border-2 shrink-0 ${insurance === "none" ? "border-amber-500" : "border-slate-300"}`}>
+                        {insurance === "none" && <span className="h-2 w-2 rounded-full bg-amber-500" />}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-semibold text-slate-900 text-sm flex items-center gap-1.5">
+                            <WarningIcon className="h-4 w-4 text-amber-500" /> No protection
+                          </span>
+                          <span className="text-sm font-semibold text-slate-500 tnum shrink-0">Free</span>
+                        </div>
+                        <p className="mt-0.5 text-xs text-slate-500">Proceed without transfer insurance.</p>
+                        {insurance === "none" && (
+                          <div className="mt-2.5 flex gap-2 rounded-lg bg-amber-100/70 p-2.5 text-[11px] leading-relaxed text-amber-900 ring-1 ring-inset ring-amber-500/30">
+                            <WarningIcon className="h-4 w-4 shrink-0 text-amber-600" />
+                            <span><strong>You are not covered.</strong> If assets are lost, delayed, or fail to settle during the transfer, you bear the full risk with no reimbursement. We strongly recommend adding protection.</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Purchasable plans (admin-priced) */}
+                  {insurancePlans.map((plan) => {
                     const active = insurance === plan.id;
-                    const cost = insurancePremium(plan.id, transferValue);
                     return (
                       <button key={plan.id} onClick={() => setInsurance(plan.id)}
                         className={`w-full text-left rounded-xl border p-4 transition ${active ? "border-brand-500 ring-2 ring-brand-500/20 bg-brand-50/40" : "border-slate-200 hover:bg-slate-50"}`}>
@@ -425,12 +449,9 @@ export default function TransferWizard({ accounts = [] }) {
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center justify-between gap-2">
                               <span className="font-semibold text-slate-900 text-sm flex items-center gap-1.5">
-                                {plan.id !== "none" && <ShieldCheck className="h-4 w-4 text-brand-600" />}
-                                {plan.name}
+                                <ShieldCheck className="h-4 w-4 text-brand-600" /> {plan.name}
                               </span>
-                              <span className="text-sm font-semibold text-slate-900 tnum shrink-0">
-                                {plan.id === "none" ? "Free" : `+${formatMoneyExact(cost)}`}
-                              </span>
+                              <span className="text-sm font-semibold text-slate-900 tnum shrink-0">{formatMoneyExact(plan.price)}</span>
                             </div>
                             <p className="mt-0.5 text-xs text-slate-500">{plan.blurb}</p>
                             {plan.features.length > 0 && (
@@ -446,11 +467,11 @@ export default function TransferWizard({ accounts = [] }) {
                     );
                   })}
                 </div>
-                {insurance !== "none" && (
+                {insurance !== "none" && selectedPlan && (
                   <div className="mt-4 flex items-center justify-between rounded-lg bg-emerald-50 px-4 py-3 ring-1 ring-inset ring-emerald-600/20">
                     <div className="text-sm">
                       <div className="font-semibold text-emerald-900">Coverage up to {formatMoney(transferValue)}</div>
-                      <div className="text-xs text-emerald-700">{getInsurancePlan(insurance).name} · premium {formatMoneyExact(premium)}</div>
+                      <div className="text-xs text-emerald-700">{selectedPlan.name} · premium {formatMoneyExact(premium)}</div>
                     </div>
                     <ShieldCheck className="h-6 w-6 text-emerald-600" />
                   </div>
@@ -589,6 +610,15 @@ function MethodCard({ active, disabled, onClick, icon, title, desc, tag, foot })
       <div className="mt-1 text-sm text-slate-500">{desc}</div>
       <div className="mt-3 text-[11px] font-medium text-slate-400">{foot}</div>
     </button>
+  );
+}
+
+function WarningIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M10.3 3.6 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0z" />
+      <path d="M12 9v4M12 17h.01" />
+    </svg>
   );
 }
 

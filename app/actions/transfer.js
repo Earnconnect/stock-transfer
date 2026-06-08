@@ -5,7 +5,8 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { settleTransfer } from "@/lib/settlement";
 import { getStockMap } from "@/lib/catalog";
-import { getBrokerage, getIraType, getInsurancePlan, insurancePremium } from "@/lib/data";
+import { getBrokerage, getIraType } from "@/lib/data";
+import { getInsurancePlanPrice } from "@/lib/insurance";
 
 function genReference(account, dtc, internal) {
   const now = new Date();
@@ -71,10 +72,11 @@ export async function createTransferAction(payload) {
   });
   const totalValue = items.reduce((s, i) => s + i.value, 0);
 
-  // Insurance — validate the plan and recompute the premium server-side.
-  const plan = getInsurancePlan(payload?.insurance);
-  const insured = plan.id !== "none";
-  const insurancePremiumAmt = insured ? insurancePremium(plan.id, totalValue) : 0;
+  // Insurance — validate the plan and read the admin-set price from the DB.
+  const planId = payload?.insurance && payload.insurance !== "none" ? payload.insurance : "none";
+  const planPrice = await getInsurancePlanPrice(planId); // null if unknown/inactive
+  const insured = planId !== "none" && planPrice != null;
+  const insurancePremiumAmt = insured ? planPrice : 0;
   const coverageAmount = insured ? totalValue : 0;
 
   const dtc = getBrokerage(destBrokerage)?.dtc || "0000";
@@ -96,7 +98,7 @@ export async function createTransferAction(payload) {
       totalValue,
       items: JSON.stringify(items),
       insured,
-      insurancePlan: plan.id,
+      insurancePlan: insured ? planId : "none",
       insurancePremium: insurancePremiumAmt,
       coverageAmount,
     },

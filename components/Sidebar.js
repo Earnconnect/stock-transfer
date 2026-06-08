@@ -17,6 +17,7 @@ const ADMIN_NAV = [
   { href: "/admin/transfers", label: "Transfers", icon: "swap" },
   { href: "/admin/accounts", label: "Funds & Holdings", icon: "wallet" },
   { href: "/admin/securities", label: "Securities", icon: "list" },
+  { href: "/admin/insurance", label: "Insurance", icon: "shield" },
   { href: "/admin/users", label: "Users", icon: "users" },
 ];
 

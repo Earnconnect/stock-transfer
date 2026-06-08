@@ -177,6 +177,17 @@ export async function setUserRole(userId, role) {
   return { ok: true };
 }
 
+export async function setInsurancePlan(id, price, active) {
+  await ensureAdmin();
+  if (!["standard", "premium"].includes(id)) return { error: "Invalid plan." };
+  const p = Number(price);
+  if (!Number.isFinite(p) || p < 0) return { error: "Enter a valid price (0 or more)." };
+  await prisma.insurancePlan.update({ where: { id }, data: { price: Math.round(p * 100) / 100, active: !!active } });
+  revalidatePath("/admin/insurance");
+  revalidatePath("/transfer");
+  return { ok: true };
+}
+
 export async function setKycStatus(userId, status) {
   await ensureAdmin();
   if (!["VERIFIED", "UNVERIFIED", "PENDING", "REJECTED"].includes(status)) return { error: "Invalid status." };

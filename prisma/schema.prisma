@@ -70,6 +70,13 @@ model Stock {
   createdAt DateTime @default(now())
 }
 
+model InsurancePlan {
+  id        String   @id // "standard" | "premium"
+  price     Float
+  active    Boolean  @default(true)
+  updatedAt DateTime @updatedAt
+}
+
 model Account {
   id            String   @id @default(cuid())
   userId        String

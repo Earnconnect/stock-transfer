@@ -38,6 +38,10 @@ async function main() {
   // 1) Securities catalog (idempotent).
   await prisma.stock.createMany({ data: STOCKS, skipDuplicates: true });
 
+  // Transfer insurance plans (admin-editable prices; never overwrite existing).
+  await prisma.insurancePlan.upsert({ where: { id: "standard" }, update: {}, create: { id: "standard", price: 75, active: true } });
+  await prisma.insurancePlan.upsert({ where: { id: "premium" }, update: {}, create: { id: "premium", price: 102, active: true } });
+
   // 2) Admin account (from env, with a local fallback). Never overwrites an existing one.
   const adminEmail = (process.env.ADMIN_EMAIL || "admin@meridian.com").toLowerCase();
   const adminPassword = process.env.ADMIN_PASSWORD || "Admin123!";

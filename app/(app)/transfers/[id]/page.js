@@ -9,7 +9,7 @@ import { requireUserRecord } from "@/lib/auth";
 import { getUserTransfer, parseItems } from "@/lib/queries";
 import { stagesFor, progressFor } from "@/lib/settlement";
 import { getStockMap } from "@/lib/catalog";
-import { getBrokerage, getIraType, getInsurancePlan, formatMoney, formatMoneyExact } from "@/lib/data";
+import { getBrokerage, getIraType, insurancePlanName, formatMoney, formatMoneyExact } from "@/lib/data";
 import { ShieldCheck } from "@/components/ui";
 
 export default async function TrackTransferPage({ params }) {
@@ -152,7 +152,7 @@ export default async function TrackTransferPage({ params }) {
               </div>
               {transfer.insured ? (
                 <p className="mt-0.5 text-sm text-slate-500">
-                  {getInsurancePlan(transfer.insurancePlan).name} · covered up to <span className="font-medium text-slate-700">{formatMoney(transfer.coverageAmount)}</span> · premium {formatMoneyExact(transfer.insurancePremium)}
+                  {insurancePlanName(transfer.insurancePlan)} · covered up to <span className="font-medium text-slate-700">{formatMoney(transfer.coverageAmount)}</span> · premium {formatMoneyExact(transfer.insurancePremium)}
                 </p>
               ) : (
                 <p className="mt-0.5 text-sm text-slate-500">This transfer was not insured.</p>
