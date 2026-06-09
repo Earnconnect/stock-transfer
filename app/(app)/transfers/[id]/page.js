@@ -9,8 +9,17 @@ import { requireUserRecord } from "@/lib/auth";
 import { getUserTransfer, parseItems } from "@/lib/queries";
 import { stagesFor, progressFor } from "@/lib/settlement";
 import { getStockMap } from "@/lib/catalog";
-import { getBrokerage, getIraType, insurancePlanName, formatMoney, formatMoneyExact } from "@/lib/data";
+import { getBrokerage, getIraType, insurancePlanName, INSURANCE_COVERAGE, formatMoney, formatMoneyExact } from "@/lib/data";
 import { ShieldCheck } from "@/components/ui";
+
+function WarningIcon({ className = "h-4 w-4" }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <path d="M10.3 3.6 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.6a2 2 0 0 0-3.4 0z" />
+      <path d="M12 9v4M12 17h.01" />
+    </svg>
+  );
+}
 
 export default async function TrackTransferPage({ params }) {
   const { id } = await params;
@@ -142,32 +151,81 @@ export default async function TrackTransferPage({ params }) {
         {/* Insurance / protection */}
         {(() => {
           const st = transfer.insuranceStatus || (transfer.insured ? "ADDED" : "NONE");
-          const meta = {
-            ADDED: { tone: "green", label: "Active", active: true },
-            REQUESTED: { tone: "gold", label: "Requested · pending approval", active: true },
-            DECLINED: { tone: "slate", label: "Declined", active: false },
-            NONE: { tone: "slate", label: "Not insured", active: false },
-          }[st] || { tone: "slate", label: "Not insured", active: false };
+          const active = st === "ADDED";
+          const pending = st === "REQUESTED";
+          const declined = st === "DECLINED";
+          const statusSeal = { ADDED: "green", REQUESTED: "gold", DECLINED: "slate", NONE: "slate" }[st] || "slate";
+          const statusLabel = { ADDED: "Active", REQUESTED: "Pending activation", DECLINED: "Declined", NONE: "Not insured" }[st] || "Not insured";
           return (
-            <section className="card animate-fade-up" style={{ animationDelay: "200ms" }}>
-              <div className="p-5 flex items-center gap-4">
-                <span className={`grid place-items-center h-11 w-11 rounded-xl shrink-0 ${meta.active ? "bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-600/20" : "bg-slate-100 text-slate-400"}`}>
-                  <ShieldCheck className="h-6 w-6" />
-                </span>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h2 className="font-semibold text-slate-900">Transfer protection</h2>
-                    <Seal tone={meta.tone}>{meta.label}</Seal>
+            <section className="card overflow-hidden animate-fade-up" style={{ animationDelay: "200ms" }}>
+              {/* Prominent animated warning while protection is not yet active */}
+              {pending && (
+                <div className="animate-attention bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-4 text-white">
+                  <div className="flex items-center gap-3">
+                    <span className="grid place-items-center h-9 w-9 shrink-0 rounded-full bg-white/20 ring-1 ring-white/40">
+                      <WarningIcon className="h-5 w-5 animate-wiggle" />
+                    </span>
+                    <div>
+                      <div className="font-bold text-sm uppercase tracking-wide">Protection not yet active</div>
+                      <div className="text-xs text-white/90">An administrator must add this protection. Until then your transfer is <strong>not covered</strong>.</div>
+                    </div>
                   </div>
-                  {transfer.insured ? (
-                    <p className="mt-0.5 text-sm text-slate-500">
-                      {insurancePlanName(transfer.insurancePlan)} · covered up to <span className="font-medium text-slate-700">{formatMoney(transfer.coverageAmount)}</span> · fee {formatMoneyExact(transfer.insurancePremium)}
-                      {st === "REQUESTED" && <span className="text-amber-600"> · awaiting administrator activation</span>}
-                    </p>
-                  ) : (
-                    <p className="mt-0.5 text-sm text-slate-500">This transfer was not insured.</p>
-                  )}
                 </div>
+              )}
+              {declined && (
+                <div className="bg-gradient-to-r from-rose-600 to-red-600 px-5 py-4 text-white">
+                  <div className="flex items-center gap-3">
+                    <span className="grid place-items-center h-9 w-9 shrink-0 rounded-full bg-white/20 ring-1 ring-white/40"><WarningIcon className="h-5 w-5" /></span>
+                    <div>
+                      <div className="font-bold text-sm uppercase tracking-wide">Protection not active</div>
+                      <div className="text-xs text-white/90">This insurance request was declined. The transfer is <strong>not covered</strong>.</div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="p-5">
+                <div className="flex items-center gap-3">
+                  <span className={`grid place-items-center h-11 w-11 rounded-xl shrink-0 ${active ? "bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-600/20" : pending ? "bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-600/20" : "bg-slate-100 text-slate-400"}`}>
+                    <ShieldCheck className="h-6 w-6" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h2 className="font-semibold text-slate-900">Transfer protection</h2>
+                      <Seal tone={statusSeal}>{statusLabel}</Seal>
+                    </div>
+                    {transfer.insured ? (
+                      <p className="mt-0.5 text-sm text-slate-500">
+                        {insurancePlanName(transfer.insurancePlan)} · covers up to <span className="font-medium text-slate-700">{formatMoney(transfer.coverageAmount)}</span> · fee {formatMoneyExact(transfer.insurancePremium)}
+                      </p>
+                    ) : (
+                      <p className="mt-0.5 text-sm text-slate-500">This transfer was not insured.</p>
+                    )}
+                  </div>
+                </div>
+
+                {transfer.insured && (
+                  <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50/60 p-4">
+                    <div className="text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      {active ? "Your protection covers" : "Once activated, this protection covers"}
+                    </div>
+                    <ul className="mt-2.5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
+                      {INSURANCE_COVERAGE.map((c) => (
+                        <li key={c} className="flex items-start gap-2 text-sm text-slate-700">
+                          <span className={`mt-0.5 grid place-items-center h-4 w-4 shrink-0 rounded-full ${active ? "bg-emerald-500 text-white" : "bg-amber-400/90 text-white"}`}>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="h-2.5 w-2.5"><path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                          </span>
+                          {c}
+                        </li>
+                      ))}
+                    </ul>
+                    {pending && (
+                      <p className="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-amber-700">
+                        <WarningIcon className="h-3.5 w-3.5" /> Coverage begins only after an administrator activates this protection.
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
             </section>
           );
