@@ -130,10 +130,17 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
       setProc((p) => ({ ...p, step: i }));
       await wait(650);
     }
-    const res = await actionP;
-    if (res?.error) {
+    let res;
+    try {
+      res = await actionP;
+    } catch (e) {
       setProc({ open: false, step: 0, status: "running" });
-      setSubmitError(res.error);
+      setSubmitError("Something went wrong submitting the transfer. Please try again.");
+      return;
+    }
+    if (!res || res.error) {
+      setProc({ open: false, step: 0, status: "running" });
+      setSubmitError(res?.error || "Something went wrong. Please try again.");
       return;
     }
     setResult(res);

@@ -11,8 +11,11 @@ import { getInsurancePlanPrice, hasActiveInsurancePlans } from "@/lib/insurance"
 function genReference(account, dtc, internal) {
   const now = new Date();
   const ym = `${String(now.getFullYear()).slice(2)}${String(now.getMonth() + 1).padStart(2, "0")}`;
-  const rand = Math.abs(account.split("").reduce((a, c) => (a * 31 + c.charCodeAt(0)) | 0, 7)) % 9000 + 1000;
-  return `${internal ? "INT" : "ACT"}-${dtc}-${ym}-${rand}`;
+  // Unique per request: random digits + a short random suffix so repeat
+  // transfers from the same account never collide on the reference.
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  const suffix = Math.random().toString(36).slice(2, 5).toUpperCase();
+  return `${internal ? "INT" : "ACT"}-${dtc}-${ym}-${rand}${suffix}`;
 }
 
 export async function createTransferAction(payload) {
@@ -96,35 +99,41 @@ export async function createTransferAction(payload) {
   const dtc = getBrokerage(destBrokerage)?.dtc || "0000";
   const reference = genReference(source.accountNumber, dtc, isInternal);
 
-  const created = await prisma.transfer.create({
-    data: {
-      reference,
-      userId: session.sub,
-      sourceAccountId: source.id,
-      destAccountId,
-      destBrokerage,
-      method: isInternal ? "INTERNAL" : "EXTERNAL",
-      recipientHolder,
-      recipientNumber,
-      recipientType,
-      transferType: transferType === "FULL" ? "FULL" : "PARTIAL",
-      status: "PENDING",
-      totalValue,
-      items: JSON.stringify(items),
-      insured,
-      insurancePlan: insured ? planId : "none",
-      insurancePremium: insurancePremiumAmt,
-      coverageAmount,
-      insuranceStatus,
-      insuranceFeePaid: feePaid,
-    },
-  });
-
-  // Internal transfers settle instantly (on-platform, between the user's own accounts).
+  let created;
   let status = "PENDING";
-  if (isInternal) {
-    await settleTransfer(created.id);
-    status = "SETTLED";
+  try {
+    created = await prisma.transfer.create({
+      data: {
+        reference,
+        userId: session.sub,
+        sourceAccountId: source.id,
+        destAccountId,
+        destBrokerage,
+        method: isInternal ? "INTERNAL" : "EXTERNAL",
+        recipientHolder,
+        recipientNumber,
+        recipientType,
+        transferType: transferType === "FULL" ? "FULL" : "PARTIAL",
+        status: "PENDING",
+        totalValue,
+        items: JSON.stringify(items),
+        insured,
+        insurancePlan: insured ? planId : "none",
+        insurancePremium: insurancePremiumAmt,
+        coverageAmount,
+        insuranceStatus,
+        insuranceFeePaid: feePaid,
+      },
+    });
+
+    // Internal transfers settle instantly (between the user's own accounts).
+    if (isInternal) {
+      await settleTransfer(created.id);
+      status = "SETTLED";
+    }
+  } catch (e) {
+    console.error("createTransferAction failed:", e);
+    return { error: "We couldn't complete the transfer. Please try again." };
   }
 
   revalidatePath("/");
