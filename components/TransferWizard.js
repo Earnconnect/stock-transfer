@@ -69,9 +69,10 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
   const hasIneligible = selectedPositions.some((p) => !isApproved(p.assetType));
   const selectedPlan = insurancePlans.find((p) => p.id === insurance);
   const premium = selectedPlan ? selectedPlan.price : 0;
-  // Insurance rules: transfers over the free limit must be insured; if a plan is
-  // chosen its premium must be payable from the source account's cash.
-  const freeAllowed = transferValue <= FREE_INSURANCE_LIMIT;
+  // Insurance rules: transfers over the free limit must be insured (only when the
+  // admin offers plans); if a plan is chosen its premium must be payable from cash.
+  const insuranceOffered = insurancePlans.length > 0;
+  const freeAllowed = !insuranceOffered || transferValue <= FREE_INSURANCE_LIMIT;
   const sourceCash = source?.cashBalance || 0;
   const premiumPayable = insurance === "none" ? true : sourceCash >= premium;
   const insuranceValid = (insurance !== "none" || freeAllowed) && premiumPayable;
@@ -416,8 +417,8 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
 
               {/* Transfer insurance */}
               <Card title="Protect this transfer"
-                desc={freeAllowed ? "Optional insurance covers your assets against loss or settlement failure during the transfer." : "Protection is required on this transfer. Choose Standard or Premium to continue."}
-                badge={insurance !== "none" ? <Seal tone="green">Protected</Seal> : <Seal tone="gold">Action needed</Seal>}>
+                desc={!insuranceOffered ? "Transfer insurance is not currently offered. You can proceed without it." : freeAllowed ? "Optional insurance covers your assets against loss or settlement failure during the transfer." : "Protection is required on this transfer. Choose Standard or Premium to continue."}
+                badge={insurance !== "none" ? <Seal tone="green">Protected</Seal> : freeAllowed ? <Seal tone="slate">Optional</Seal> : <Seal tone="gold">Action needed</Seal>}>
                 {!freeAllowed && (
                   <div className="mb-4 flex gap-3 rounded-xl bg-brand-50 p-4 ring-1 ring-inset ring-brand-600/15">
                     <ShieldCheck className="h-5 w-5 shrink-0 text-brand-700" />

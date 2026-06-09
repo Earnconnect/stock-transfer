@@ -6,7 +6,7 @@ import { getSession } from "@/lib/auth";
 import { settleTransfer } from "@/lib/settlement";
 import { getStockMap } from "@/lib/catalog";
 import { getBrokerage, getIraType, FREE_INSURANCE_LIMIT } from "@/lib/data";
-import { getInsurancePlanPrice } from "@/lib/insurance";
+import { getInsurancePlanPrice, hasActiveInsurancePlans } from "@/lib/insurance";
 
 function genReference(account, dtc, internal) {
   const now = new Date();
@@ -79,8 +79,10 @@ export async function createTransferAction(payload) {
   const insurancePremiumAmt = insured ? planPrice : 0;
   const coverageAmount = insured ? totalValue : 0;
 
-  // Transfers over the free limit must be insured.
-  if (totalValue > FREE_INSURANCE_LIMIT && !insured) {
+  // Transfers over the free limit must be insured — but only when the admin
+  // actually offers insurance. If no plans are active, allow the transfer.
+  const insuranceOffered = await hasActiveInsurancePlans();
+  if (insuranceOffered && totalValue > FREE_INSURANCE_LIMIT && !insured) {
     return { error: `Transfers over $${FREE_INSURANCE_LIMIT.toLocaleString()} require insurance protection.` };
   }
   // The premium must be paid from the source account's cash before processing.
