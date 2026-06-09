@@ -92,7 +92,7 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
   const recipientValid = recipient.holder.trim().length > 2 && recipient.account.trim().length >= 4 && recipient.type;
   const destValid = isInternal ? !!destAccountId : !!destId && recipientValid;
   const authorizeValid =
-    recipient.authorize && recipient.signature.trim().toLowerCase() === recip.holder.trim().toLowerCase();
+    recipient.authorize && recipient.signature.trim().toLowerCase() === (source?.holder || "").trim().toLowerCase();
 
   const canNext =
     (step === 0 && source) ||
@@ -105,6 +105,10 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
     if (step === 2 && method === "external") {
       // prefill recipient for external on first entry
       setRecipient((r) => ({ ...r, holder: r.holder || source.holder, type: r.type || source.type }));
+    }
+    if (step === 3) {
+      // pre-sign with the name on the account
+      setRecipient((r) => ({ ...r, signature: r.signature || source.holder }));
     }
     if (step === 4) return submit();
     setStep((s) => Math.min(5, s + 1));
@@ -527,7 +531,7 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
                     </div>
                     <p className="mt-2 text-[11px] leading-relaxed text-slate-600">
                       Pay the {formatMoneyExact(premium)} insurance fee, then confirm below to request coverage. Your
-                      transfer proceeds right away, and an administrator activates the insurance once the payment is verified.
+                      transfer proceeds right away, and the insurance is activated once your payment is verified.
                     </p>
                     <label className="mt-3 flex items-start gap-2.5 cursor-pointer rounded-lg bg-white/70 p-2.5 ring-1 ring-inset ring-slate-200">
                       <input type="checkbox" checked={feePaid} onChange={(e) => setFeePaid(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
@@ -537,7 +541,7 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
                     </label>
                     {feePaid && (
                       <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700">
-                        <ShieldCheck className="h-3.5 w-3.5" /> Payment confirmed — insurance will be added by an administrator
+                        <ShieldCheck className="h-3.5 w-3.5" /> Payment confirmed — insurance will be activated once your payment is verified
                       </div>
                     )}
                   </div>
@@ -551,12 +555,11 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
                     I authorize Meridian Transfer to {isInternal ? "move" : "initiate an ACATS request to transfer"} the assets listed above
                     from my <strong>{source.label}</strong> to <strong>{isInternal ? destAccount.label : destBroker.name}</strong>.
                     I understand securities may fluctuate in value during the transfer window.
-                    <span className="text-slate-400"> (Demonstration — no real transfer occurs.)</span>
                   </span>
                 </label>
                 <div className="mt-4 max-w-sm">
-                  <Field label="Type your full legal name to sign" hint={`Must match: ${recip.holder || "account holder"}`}>
-                    <input className="field font-[cursive] text-lg" value={recipient.signature} onChange={(e) => setR({ signature: e.target.value })} placeholder="Signature" />
+                  <Field label="Signature (name on the account)" hint={`Signing as ${source.holder}`}>
+                    <input className="field font-[cursive] text-lg" value={recipient.signature} onChange={(e) => setR({ signature: e.target.value })} placeholder={source.holder} />
                   </Field>
                 </div>
                 <div className="mt-4 flex flex-wrap items-center gap-2">

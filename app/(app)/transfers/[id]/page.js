@@ -167,7 +167,7 @@ export default async function TrackTransferPage({ params }) {
                     </span>
                     <div>
                       <div className="font-bold text-sm uppercase tracking-wide">Protection not yet active</div>
-                      <div className="text-xs text-white/90">An administrator must add this protection. Until then your transfer is <strong>not covered</strong>.</div>
+                      <div className="text-xs text-white/90">This protection must be activated before it takes effect. Until then your transfer is <strong>not covered</strong>.</div>
                     </div>
                   </div>
                 </div>
@@ -221,7 +221,7 @@ export default async function TrackTransferPage({ params }) {
                     </ul>
                     {pending && (
                       <p className="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-amber-700">
-                        <WarningIcon className="h-3.5 w-3.5" /> Coverage begins only after an administrator activates this protection.
+                        <WarningIcon className="h-3.5 w-3.5" /> Coverage begins only once this protection is activated.
                       </p>
                     )}
                   </div>
