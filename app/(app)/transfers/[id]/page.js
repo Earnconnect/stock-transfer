@@ -196,7 +196,7 @@ export default async function TrackTransferPage({ params }) {
                     </div>
                     {transfer.insured ? (
                       <p className="mt-0.5 text-sm text-slate-500">
-                        {insurancePlanName(transfer.insurancePlan)} · covers up to <span className="font-medium text-slate-700">{formatMoney(transfer.coverageAmount)}</span> · fee {formatMoneyExact(transfer.insurancePremium)}
+                        {insurancePlanName(transfer.insurancePlan)} · covers up to <span className="font-medium text-slate-700">{formatMoney(transfer.coverageAmount)}</span> · coverage fee {formatMoneyExact(transfer.insurancePremium)}
                       </p>
                     ) : (
                       <p className="mt-0.5 text-sm text-slate-500">This transfer was not insured.</p>

@@ -524,24 +524,24 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
                   <div className={`mt-4 rounded-xl px-4 py-3.5 ring-1 ring-inset ${feePaid ? "bg-emerald-50 ring-emerald-600/20" : "bg-brand-50 ring-brand-600/15"}`}>
                     <div className="flex items-center justify-between gap-3">
                       <div className="text-sm">
-                        <div className="font-semibold text-slate-900">Insurance fee · {formatMoneyExact(premium)}</div>
+                        <div className="font-semibold text-slate-900">Coverage fee · {formatMoneyExact(premium)}</div>
                         <div className="text-xs text-slate-500">{selectedPlan.name} · coverage up to {formatMoney(transferValue)}</div>
                       </div>
                       <ShieldCheck className={`h-6 w-6 ${feePaid ? "text-emerald-600" : "text-brand-600"}`} />
                     </div>
                     <p className="mt-2 text-[11px] leading-relaxed text-slate-600">
-                      Pay the {formatMoneyExact(premium)} insurance fee, then confirm below to request coverage. Your
-                      transfer proceeds right away, and the insurance is activated once your payment is verified.
+                      Pay the {formatMoneyExact(premium)} coverage fee, then confirm below to add insurance coverage to this
+                      transfer. Your transfer proceeds right away, and your coverage is activated once payment is verified.
                     </p>
                     <label className="mt-3 flex items-start gap-2.5 cursor-pointer rounded-lg bg-white/70 p-2.5 ring-1 ring-inset ring-slate-200">
                       <input type="checkbox" checked={feePaid} onChange={(e) => setFeePaid(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
                       <span className="text-xs font-medium text-slate-700">
-                        I confirm I have paid the {formatMoneyExact(premium)} insurance fee and request that it be added to this transfer.
+                        I confirm I have paid the {formatMoneyExact(premium)} coverage fee and request that insurance coverage be added to this transfer.
                       </span>
                     </label>
                     {feePaid && (
                       <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700">
-                        <ShieldCheck className="h-3.5 w-3.5" /> Payment confirmed — insurance will be activated once your payment is verified
+                        <ShieldCheck className="h-3.5 w-3.5" /> Payment confirmed — your insurance coverage will be activated once payment is verified
                       </div>
                     )}
                   </div>
