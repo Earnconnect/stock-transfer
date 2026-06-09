@@ -53,8 +53,8 @@ export default function Timeline({ transfer }) {
         const when =
           s.key === "SUBMITTED" ? stamps.SUBMITTED :
           s.key === "APPROVED" ? (stamps.APPROVED || `Est. ${estimate(transfer.createdAt, 1)}`) :
-          s.key === "REGISTERED" ? (done ? "Completed" : `Est. ${estimate(transfer.createdAt, 3)}`) :
-          s.key === "SETTLED" ? (stamps.SETTLED || `Est. ${estimate(transfer.createdAt, 5)}`) : null;
+          s.key === "REGISTERED" ? (done ? "Completed" : `Est. ${estimate(transfer.createdAt, 2)}`) :
+          s.key === "SETTLED" ? (stamps.SETTLED || `Est. ${estimate(transfer.createdAt, 3)}`) : null;
 
         return (
           <li key={s.key} className="relative pl-7 pb-6 last:pb-0 animate-step" style={{ animationDelay: `${i * 110}ms` }}>
