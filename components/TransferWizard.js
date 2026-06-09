@@ -373,7 +373,7 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
                   </Panel>
                 </div>
 
-                <div className="mt-4 overflow-hidden rounded-lg border border-slate-200">
+                <div className="mt-4 overflow-x-auto scroll-thin rounded-lg border border-slate-200">
                   <table className="min-w-full text-sm">
                     <thead><tr className="text-left text-[11px] uppercase tracking-wide text-slate-400 bg-slate-50 border-b border-slate-200">
                       <th className="px-4 py-2 font-medium">Security</th><th className="px-4 py-2 font-medium">Qty</th><th className="px-4 py-2 font-medium text-right">Value</th></tr></thead>
