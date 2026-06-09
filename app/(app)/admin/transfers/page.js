@@ -1,9 +1,10 @@
 import { Seal, SectionHeader } from "@/components/ui";
 import BrokerLogo from "@/components/BrokerLogo";
 import TransferActions from "@/components/admin/TransferActions";
+import InsuranceActions from "@/components/admin/InsuranceActions";
 import { requireAdmin } from "@/lib/auth";
 import { getAllTransfers, parseItems } from "@/lib/queries";
-import { getBrokerage, getIraType, formatMoney } from "@/lib/data";
+import { getBrokerage, getIraType, insurancePlanName, formatMoney, formatMoneyExact } from "@/lib/data";
 
 const STATUS_TONE = { PENDING: "gold", APPROVED: "brand", SETTLED: "green", REJECTED: "slate" };
 
@@ -37,6 +38,7 @@ export default async function AdminTransfersPage() {
                       <th className="px-5 py-3 font-medium">Type</th>
                       <th className="px-5 py-3 font-medium text-right">Value</th>
                       <th className="px-5 py-3 font-medium">Status</th>
+                      <th className="px-5 py-3 font-medium">Insurance</th>
                       <th className="px-5 py-3 font-medium text-right">Actions</th>
                     </tr>
                   </thead>
@@ -72,6 +74,9 @@ export default async function AdminTransfersPage() {
                           </td>
                           <td className="px-5 py-4 text-right font-medium text-slate-900 tnum">{formatMoney(t.totalValue)}</td>
                           <td className="px-5 py-4"><Seal tone={STATUS_TONE[t.status]}>{t.status}</Seal></td>
+                          <td className="px-5 py-4">
+                            <InsuranceActions id={t.id} insured={t.insured} status={t.insuranceStatus} plan={insurancePlanName(t.insurancePlan)} premium={formatMoneyExact(t.insurancePremium)} />
+                          </td>
                           <td className="px-5 py-4"><TransferActions id={t.id} status={t.status} /></td>
                         </tr>
                       );

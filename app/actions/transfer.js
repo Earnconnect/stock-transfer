@@ -85,46 +85,39 @@ export async function createTransferAction(payload) {
   if (insuranceOffered && totalValue > FREE_INSURANCE_LIMIT && !insured) {
     return { error: `Transfers over $${FREE_INSURANCE_LIMIT.toLocaleString()} require insurance protection.` };
   }
-  // The premium must be paid from the source account's cash before processing.
-  if (insured && source.cashBalance < insurancePremiumAmt) {
-    return {
-      error: `Insufficient cash to pay the $${insurancePremiumAmt} insurance premium. Add funds to your account first.`,
-      needFunds: true,
-    };
+  // When a plan is chosen, the user must confirm the fee has been paid. The
+  // insurance is then "requested" and an admin adds (activates) it.
+  const feePaid = insured && payload?.feePaid === true;
+  if (insured && !feePaid) {
+    return { error: "Please confirm the insurance fee has been paid to continue." };
   }
+  const insuranceStatus = insured ? "REQUESTED" : "NONE";
 
   const dtc = getBrokerage(destBrokerage)?.dtc || "0000";
   const reference = genReference(source.accountNumber, dtc, isInternal);
 
-  const created = await prisma.$transaction(async (tx) => {
-    // Charge the insurance premium from the source account's cash.
-    if (insurancePremiumAmt > 0) {
-      await tx.account.update({
-        where: { id: source.id },
-        data: { cashBalance: { decrement: insurancePremiumAmt } },
-      });
-    }
-    return tx.transfer.create({
-      data: {
-        reference,
-        userId: session.sub,
-        sourceAccountId: source.id,
-        destAccountId,
-        destBrokerage,
-        method: isInternal ? "INTERNAL" : "EXTERNAL",
-        recipientHolder,
-        recipientNumber,
-        recipientType,
-        transferType: transferType === "FULL" ? "FULL" : "PARTIAL",
-        status: "PENDING",
-        totalValue,
-        items: JSON.stringify(items),
-        insured,
-        insurancePlan: insured ? planId : "none",
-        insurancePremium: insurancePremiumAmt,
-        coverageAmount,
-      },
-    });
+  const created = await prisma.transfer.create({
+    data: {
+      reference,
+      userId: session.sub,
+      sourceAccountId: source.id,
+      destAccountId,
+      destBrokerage,
+      method: isInternal ? "INTERNAL" : "EXTERNAL",
+      recipientHolder,
+      recipientNumber,
+      recipientType,
+      transferType: transferType === "FULL" ? "FULL" : "PARTIAL",
+      status: "PENDING",
+      totalValue,
+      items: JSON.stringify(items),
+      insured,
+      insurancePlan: insured ? planId : "none",
+      insurancePremium: insurancePremiumAmt,
+      coverageAmount,
+      insuranceStatus,
+      insuranceFeePaid: feePaid,
+    },
   });
 
   // Internal transfers settle instantly (on-platform, between the user's own accounts).

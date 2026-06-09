@@ -177,6 +177,15 @@ export async function setUserRole(userId, role) {
   return { ok: true };
 }
 
+export async function setTransferInsuranceStatus(transferId, status) {
+  await ensureAdmin();
+  if (!["ADDED", "DECLINED", "REQUESTED"].includes(status)) return { error: "Invalid status." };
+  await prisma.transfer.update({ where: { id: transferId }, data: { insuranceStatus: status } });
+  revalidatePath("/admin/transfers");
+  revalidatePath("/transfers");
+  return { ok: true };
+}
+
 export async function setInsurancePlan(id, price, active) {
   await ensureAdmin();
   if (!["standard", "premium"].includes(id)) return { error: "Invalid plan." };

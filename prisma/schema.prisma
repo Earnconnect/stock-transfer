@@ -127,6 +127,8 @@ model Transfer {
   insurancePlan    String? // none | standard | premium
   insurancePremium Float   @default(0)
   coverageAmount   Float   @default(0)
+  insuranceStatus  String  @default("NONE") // NONE | REQUESTED | ADDED | DECLINED
+  insuranceFeePaid Boolean @default(false)  // user attested the fee was paid
   note            String?  // admin note on reject/approve
   createdAt       DateTime @default(now())
   approvedAt      DateTime?

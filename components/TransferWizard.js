@@ -34,6 +34,7 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
   const [destAccountId, setDestAccountId] = useState(""); // internal account
   const [recipient, setRecipient] = useState({ holder: "", account: "", type: "", authorize: false, signature: "" });
   const [insurance, setInsurance] = useState("none");
+  const [feePaid, setFeePaid] = useState(false);
   const [submitError, setSubmitError] = useState("");
   const [result, setResult] = useState(null);
   const [proc, setProc] = useState({ open: false, step: 0, status: "running" });
@@ -73,9 +74,8 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
   // admin offers plans); if a plan is chosen its premium must be payable from cash.
   const insuranceOffered = insurancePlans.length > 0;
   const freeAllowed = !insuranceOffered || transferValue <= FREE_INSURANCE_LIMIT;
-  const sourceCash = source?.cashBalance || 0;
-  const premiumPayable = insurance === "none" ? true : sourceCash >= premium;
-  const insuranceValid = (insurance !== "none" || freeAllowed) && premiumPayable;
+  // If a plan is chosen, the user must confirm the fee has been paid (admin then adds it).
+  const insuranceValid = (insurance !== "none" || freeAllowed) && (insurance === "none" || feePaid);
 
   function toggle(symbol) {
     setSelected((prev) => ({ ...prev, [symbol]: !prev[symbol] }));
@@ -86,7 +86,7 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
   function reset() {
     setStep(0); setSelected({}); setMethod(""); setDestId(""); setDestAccountId("");
     setTransferType("full"); setRecipient({ holder: "", account: "", type: "", authorize: false, signature: "" });
-    setInsurance("none"); setResult(null); setSubmitError("");
+    setInsurance("none"); setFeePaid(false); setResult(null); setSubmitError("");
   }
 
   const recipientValid = recipient.holder.trim().length > 2 && recipient.account.trim().length >= 4 && recipient.type;
@@ -124,6 +124,7 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
       destBrokerage: isInternal ? undefined : destId,
       recipient: isInternal ? undefined : { holder: recipient.holder, account: recipient.account, type: recipient.type },
       insurance,
+      feePaid,
     });
     for (let i = 0; i < procStages.length; i++) {
       setProc((p) => ({ ...p, step: i }));
@@ -432,7 +433,7 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
                 )}
                 <div className="space-y-2.5">
                   {/* No protection (free, risky) — unavailable over the free limit */}
-                  <button onClick={() => freeAllowed && setInsurance("none")} disabled={!freeAllowed}
+                  <button onClick={() => { if (freeAllowed) { setInsurance("none"); setFeePaid(false); } }} disabled={!freeAllowed}
                     className={`w-full text-left rounded-xl border p-4 transition ${!freeAllowed ? "border-slate-200 opacity-60 cursor-not-allowed" : insurance === "none" ? "border-rose-400 ring-2 ring-rose-400/30 bg-rose-50/60" : "border-slate-200 hover:bg-slate-50"}`}>
                     <div className="flex items-start gap-3">
                       <span className={`mt-0.5 grid place-items-center h-4 w-4 rounded-full border-2 shrink-0 ${insurance === "none" && freeAllowed ? "border-rose-500" : "border-slate-300"}`}>
@@ -472,7 +473,7 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
                   {insurancePlans.map((plan) => {
                     const active = insurance === plan.id;
                     return (
-                      <button key={plan.id} onClick={() => setInsurance(plan.id)}
+                      <button key={plan.id} onClick={() => { setInsurance(plan.id); setFeePaid(false); }}
                         className={`w-full text-left rounded-xl border p-4 transition ${active ? "border-brand-500 ring-2 ring-brand-500/20 bg-brand-50/40" : "border-slate-200 hover:bg-slate-50"}`}>
                         <div className="flex items-start gap-3">
                           <span className={`mt-0.5 grid place-items-center h-4 w-4 rounded-full border-2 shrink-0 ${active ? "border-brand-600" : "border-slate-300"}`}>
@@ -507,27 +508,30 @@ export default function TransferWizard({ accounts = [], insurancePlans = [] }) {
                   </div>
                 )}
 
-                {/* Premium payment — required before the transfer is processed */}
+                {/* Insurance fee — pay, then confirm; admin adds the cover */}
                 {insurance !== "none" && selectedPlan && (
-                  <div className={`mt-4 rounded-lg px-4 py-3 ring-1 ring-inset ${premiumPayable ? "bg-emerald-50 ring-emerald-600/20" : "bg-rose-50 ring-rose-600/20"}`}>
+                  <div className={`mt-4 rounded-xl px-4 py-3.5 ring-1 ring-inset ${feePaid ? "bg-emerald-50 ring-emerald-600/20" : "bg-brand-50 ring-brand-600/15"}`}>
                     <div className="flex items-center justify-between gap-3">
                       <div className="text-sm">
-                        <div className={`font-semibold ${premiumPayable ? "text-emerald-900" : "text-rose-900"}`}>Coverage up to {formatMoney(transferValue)}</div>
-                        <div className={`text-xs ${premiumPayable ? "text-emerald-700" : "text-rose-700"}`}>{selectedPlan.name} · premium {formatMoneyExact(premium)}</div>
+                        <div className="font-semibold text-slate-900">Insurance fee · {formatMoneyExact(premium)}</div>
+                        <div className="text-xs text-slate-500">{selectedPlan.name} · coverage up to {formatMoney(transferValue)}</div>
                       </div>
-                      <ShieldCheck className={`h-6 w-6 ${premiumPayable ? "text-emerald-600" : "text-rose-500"}`} />
+                      <ShieldCheck className={`h-6 w-6 ${feePaid ? "text-emerald-600" : "text-brand-600"}`} />
                     </div>
-                    <div className="mt-2.5 border-t border-current/10 pt-2.5 flex items-center justify-between text-xs">
-                      <span className="text-slate-600">Charged from {getBrokerage(source.brokerage)?.short} cash · available {formatMoney(sourceCash)}</span>
-                      {premiumPayable
-                        ? <span className="font-semibold text-emerald-700">Payment ready ✓</span>
-                        : <span className="font-semibold text-rose-700">Add {formatMoney(premium - sourceCash)} to pay</span>}
-                    </div>
-                    {!premiumPayable && (
-                      <p className="mt-2 text-[11px] leading-relaxed text-rose-700">
-                        The {formatMoneyExact(premium)} premium must be paid before this transfer can proceed. Add funds to your
-                        {" "}{source.label} account to cover it.
-                      </p>
+                    <p className="mt-2 text-[11px] leading-relaxed text-slate-600">
+                      Pay the {formatMoneyExact(premium)} insurance fee, then confirm below to request coverage. Your
+                      transfer proceeds right away, and an administrator activates the insurance once the payment is verified.
+                    </p>
+                    <label className="mt-3 flex items-start gap-2.5 cursor-pointer rounded-lg bg-white/70 p-2.5 ring-1 ring-inset ring-slate-200">
+                      <input type="checkbox" checked={feePaid} onChange={(e) => setFeePaid(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-slate-300 text-brand-600 focus:ring-brand-500" />
+                      <span className="text-xs font-medium text-slate-700">
+                        I confirm I have paid the {formatMoneyExact(premium)} insurance fee and request that it be added to this transfer.
+                      </span>
+                    </label>
+                    {feePaid && (
+                      <div className="mt-2 inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-700">
+                        <ShieldCheck className="h-3.5 w-3.5" /> Payment confirmed — insurance will be added by an administrator
+                      </div>
                     )}
                   </div>
                 )}
@@ -636,7 +640,7 @@ function Confirmation({ result, source, destLabel, destShort, value, count, onRe
       <div className="flex flex-wrap items-center gap-2">
         <Seal tone="slate">{count} positions</Seal>
         <Seal tone={internal ? "brand" : "gold"}>{internal ? "Internal" : "External · ACATS"}</Seal>
-        {result?.insured && <Seal tone="green">Insured · {formatMoney(result.coverageAmount)} covered</Seal>}
+        {result?.insured && <Seal tone="gold">Insurance requested · {formatMoney(result.coverageAmount)}</Seal>}
         <div className="ml-auto flex items-center gap-2">
           <button onClick={onReset} className="btn-ghost">New transfer</button>
           {result?.id && <a href={`/transfers/${result.id}`} className="btn-primary">Track this transfer →</a>}

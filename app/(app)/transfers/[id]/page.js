@@ -140,26 +140,38 @@ export default async function TrackTransferPage({ params }) {
         </section>
 
         {/* Insurance / protection */}
-        <section className="card animate-fade-up" style={{ animationDelay: "200ms" }}>
-          <div className="p-5 flex items-center gap-4">
-            <span className={`grid place-items-center h-11 w-11 rounded-xl shrink-0 ${transfer.insured ? "bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-600/20" : "bg-slate-100 text-slate-400"}`}>
-              <ShieldCheck className="h-6 w-6" />
-            </span>
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <h2 className="font-semibold text-slate-900">Transfer protection</h2>
-                <Seal tone={transfer.insured ? "green" : "slate"}>{transfer.insured ? "Insured" : "Not insured"}</Seal>
+        {(() => {
+          const st = transfer.insuranceStatus || (transfer.insured ? "ADDED" : "NONE");
+          const meta = {
+            ADDED: { tone: "green", label: "Active", active: true },
+            REQUESTED: { tone: "gold", label: "Requested · pending approval", active: true },
+            DECLINED: { tone: "slate", label: "Declined", active: false },
+            NONE: { tone: "slate", label: "Not insured", active: false },
+          }[st] || { tone: "slate", label: "Not insured", active: false };
+          return (
+            <section className="card animate-fade-up" style={{ animationDelay: "200ms" }}>
+              <div className="p-5 flex items-center gap-4">
+                <span className={`grid place-items-center h-11 w-11 rounded-xl shrink-0 ${meta.active ? "bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-600/20" : "bg-slate-100 text-slate-400"}`}>
+                  <ShieldCheck className="h-6 w-6" />
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="font-semibold text-slate-900">Transfer protection</h2>
+                    <Seal tone={meta.tone}>{meta.label}</Seal>
+                  </div>
+                  {transfer.insured ? (
+                    <p className="mt-0.5 text-sm text-slate-500">
+                      {insurancePlanName(transfer.insurancePlan)} · covered up to <span className="font-medium text-slate-700">{formatMoney(transfer.coverageAmount)}</span> · fee {formatMoneyExact(transfer.insurancePremium)}
+                      {st === "REQUESTED" && <span className="text-amber-600"> · awaiting administrator activation</span>}
+                    </p>
+                  ) : (
+                    <p className="mt-0.5 text-sm text-slate-500">This transfer was not insured.</p>
+                  )}
+                </div>
               </div>
-              {transfer.insured ? (
-                <p className="mt-0.5 text-sm text-slate-500">
-                  {insurancePlanName(transfer.insurancePlan)} · covered up to <span className="font-medium text-slate-700">{formatMoney(transfer.coverageAmount)}</span> · premium {formatMoneyExact(transfer.insurancePremium)}
-                </p>
-              ) : (
-                <p className="mt-0.5 text-sm text-slate-500">This transfer was not insured.</p>
-              )}
-            </div>
-          </div>
-        </section>
+            </section>
+          );
+        })()}
 
         {transfer.status === "SETTLED" && (
           <div className="flex items-center gap-2 rounded-xl bg-emerald-50 px-5 py-4 ring-1 ring-inset ring-emerald-600/20">
