@@ -158,32 +158,36 @@ export default async function TrackTransferPage({ params }) {
           const statusLabel = { ADDED: "Active", REQUESTED: "Pending activation", DECLINED: "Declined", NONE: "Not insured" }[st] || "Not insured";
           return (
             <section className="card overflow-hidden animate-fade-up" style={{ animationDelay: "200ms" }}>
-              {/* Prominent animated warning while protection is not yet active */}
+              {/* Warning while protection is not yet active — institutional dark treatment */}
               {pending && (
-                <div className="animate-attention bg-gradient-to-r from-amber-500 to-orange-500 px-5 py-4 text-white">
-                  <div className="flex items-center gap-3">
-                    <span className="grid place-items-center h-9 w-9 shrink-0 rounded-full bg-white/20 ring-1 ring-white/40">
-                      <WarningIcon className="h-5 w-5 animate-wiggle" />
+                <div className="relative bg-slate-900 px-5 py-4 text-slate-100">
+                  <span className="absolute inset-y-0 left-0 w-1 bg-amber-400/80" />
+                  <div className="flex items-start gap-3 pl-1.5">
+                    <span className="grid place-items-center h-9 w-9 shrink-0 rounded-full bg-amber-400/15 text-amber-300 ring-1 ring-inset ring-amber-400/30">
+                      <WarningIcon className="h-5 w-5" />
                     </span>
-                    <div>
-                      <div className="font-bold text-sm uppercase tracking-wide">Protection not yet active</div>
-                      <div className="text-xs text-white/90">
-                        <span className="mx-0.5 inline-block rounded-md bg-white px-2 py-0.5 text-sm font-extrabold uppercase tracking-wide text-red-600 shadow-sm ring-1 ring-red-600/20">
-                          {dest?.name || "The receiving firm"}
-                        </span>{" "}
-                        requires full insurance coverage on the incoming assets before this transfer can be released. Until this protection is activated, your transfer is <strong>not covered</strong>.
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-semibold text-white">Protection not yet active</span>
+                        <span className="rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-amber-300 ring-1 ring-inset ring-amber-400/25">Action required</span>
                       </div>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-300">
+                        <span className="font-bold text-amber-300">{dest?.name || "The receiving firm"}</span> requires full insurance
+                        coverage on the incoming assets before this transfer can be released. Until this protection is activated,
+                        your transfer is <span className="font-semibold text-white">not covered</span>.
+                      </p>
                     </div>
                   </div>
                 </div>
               )}
               {declined && (
-                <div className="bg-gradient-to-r from-rose-600 to-red-600 px-5 py-4 text-white">
-                  <div className="flex items-center gap-3">
-                    <span className="grid place-items-center h-9 w-9 shrink-0 rounded-full bg-white/20 ring-1 ring-white/40"><WarningIcon className="h-5 w-5" /></span>
+                <div className="relative bg-slate-900 px-5 py-4 text-slate-100">
+                  <span className="absolute inset-y-0 left-0 w-1 bg-rose-500/80" />
+                  <div className="flex items-start gap-3 pl-1.5">
+                    <span className="grid place-items-center h-9 w-9 shrink-0 rounded-full bg-rose-500/15 text-rose-300 ring-1 ring-inset ring-rose-500/30"><WarningIcon className="h-5 w-5" /></span>
                     <div>
-                      <div className="font-bold text-sm uppercase tracking-wide">Protection not active</div>
-                      <div className="text-xs text-white/90">This insurance request was declined. The transfer is <strong>not covered</strong>.</div>
+                      <div className="font-semibold text-white">Protection not active</div>
+                      <p className="mt-1 text-xs leading-relaxed text-slate-300">This insurance request was declined. The transfer is <span className="font-semibold text-white">not covered</span>.</p>
                     </div>
                   </div>
                 </div>
@@ -217,7 +221,7 @@ export default async function TrackTransferPage({ params }) {
                     <ul className="mt-2.5 grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2">
                       {INSURANCE_COVERAGE.map((c) => (
                         <li key={c} className="flex items-start gap-2 text-sm text-slate-700">
-                          <span className={`mt-0.5 grid place-items-center h-4 w-4 shrink-0 rounded-full ${active ? "bg-emerald-500 text-white" : "bg-amber-400/90 text-white"}`}>
+                          <span className={`mt-0.5 grid place-items-center h-4 w-4 shrink-0 rounded-full ${active ? "bg-emerald-500 text-white" : "bg-slate-300 text-white"}`}>
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3.5" className="h-2.5 w-2.5"><path d="M5 12l5 5L20 7" strokeLinecap="round" strokeLinejoin="round" /></svg>
                           </span>
                           {c}
