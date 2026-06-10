@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { setTransferStatus } from "@/app/actions/admin";
+import { setTransferStatus, deleteTransfer } from "@/app/actions/admin";
 
-export default function TransferActions({ id, status }) {
+export default function TransferActions({ id, status, reference }) {
   const [pending, start] = useTransition();
   const [err, setErr] = useState("");
 
@@ -11,6 +11,15 @@ export default function TransferActions({ id, status }) {
     setErr("");
     start(async () => {
       const res = await setTransferStatus(id, next);
+      if (res?.error) setErr(res.error);
+    });
+  }
+
+  function remove() {
+    if (!window.confirm(`Delete transfer ${reference || ""} from history? This cannot be undone.`)) return;
+    setErr("");
+    start(async () => {
+      const res = await deleteTransfer(id);
       if (res?.error) setErr(res.error);
     });
   }
@@ -30,7 +39,13 @@ export default function TransferActions({ id, status }) {
         <Btn tone="ghost" disabled={pending} onClick={() => act("PENDING")}>Reopen</Btn>
       )}
       {status === "SETTLED" && <span className="text-[11px] font-medium text-emerald-600">Delivered ✓</span>}
-      {err && <span className="text-[11px] text-rose-600">{err}</span>}
+      <button onClick={remove} disabled={pending} title="Delete from history"
+        className="grid place-items-center h-[26px] w-[26px] rounded-md border border-slate-200 text-slate-400 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:opacity-50">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+          <path d="M3 6h18M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2m2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6M10 11v6M14 11v6" />
+        </svg>
+      </button>
+      {err && <span className="text-[11px] text-rose-600 w-full text-right">{err}</span>}
     </div>
   );
 }

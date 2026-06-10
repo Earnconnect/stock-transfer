@@ -177,6 +177,30 @@ export async function setUserRole(userId, role) {
   return { ok: true };
 }
 
+// ---------------- Transfer history management ----------------
+export async function deleteTransfer(transferId) {
+  await ensureAdmin();
+  if (!transferId) return { error: "Invalid transfer." };
+  try {
+    await prisma.transfer.delete({ where: { id: transferId } });
+  } catch {
+    return { error: "Transfer not found or already removed." };
+  }
+  revalidatePath("/admin/transfers");
+  revalidatePath("/admin");
+  revalidatePath("/transfers");
+  return { ok: true };
+}
+
+export async function deleteAllTransfers() {
+  await ensureAdmin();
+  const { count } = await prisma.transfer.deleteMany();
+  revalidatePath("/admin/transfers");
+  revalidatePath("/admin");
+  revalidatePath("/transfers");
+  return { ok: true, count };
+}
+
 export async function setTransferInsuranceStatus(transferId, status) {
   await ensureAdmin();
   if (!["ADDED", "DECLINED", "REQUESTED"].includes(status)) return { error: "Invalid status." };

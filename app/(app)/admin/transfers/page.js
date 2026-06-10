@@ -2,6 +2,7 @@ import { Seal, SectionHeader } from "@/components/ui";
 import BrokerLogo from "@/components/BrokerLogo";
 import TransferActions from "@/components/admin/TransferActions";
 import InsuranceActions from "@/components/admin/InsuranceActions";
+import ClearTransfers from "@/components/admin/ClearTransfers";
 import { requireAdmin } from "@/lib/auth";
 import { getAllTransfers, parseItems } from "@/lib/queries";
 import { getBrokerage, getIraType, insurancePlanName, formatMoney, formatMoneyExact } from "@/lib/data";
@@ -21,6 +22,14 @@ export default async function AdminTransfersPage() {
   return (
     <main className="bg-grid min-h-full">
       <div className="page">
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <h1 className="text-lg font-semibold text-slate-900">Transfers</h1>
+            <p className="text-sm text-slate-500">{transfers.length} record{transfers.length === 1 ? "" : "s"} · review, action, or remove from history.</p>
+          </div>
+          <ClearTransfers count={transfers.length} />
+        </div>
+
         {transfers.length === 0 && (
           <div className="card-pad text-center text-sm text-slate-400 py-12">No transfer requests have been submitted yet.</div>
         )}
@@ -77,7 +86,7 @@ export default async function AdminTransfersPage() {
                           <td className="px-5 py-4">
                             <InsuranceActions id={t.id} insured={t.insured} status={t.insuranceStatus} plan={insurancePlanName(t.insurancePlan)} premium={formatMoneyExact(t.insurancePremium)} />
                           </td>
-                          <td className="px-5 py-4"><TransferActions id={t.id} status={t.status} /></td>
+                          <td className="px-5 py-4"><TransferActions id={t.id} status={t.status} reference={t.reference} /></td>
                         </tr>
                       );
                     })}
