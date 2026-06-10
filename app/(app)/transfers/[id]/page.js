@@ -168,8 +168,10 @@ export default async function TrackTransferPage({ params }) {
                     <div>
                       <div className="font-bold text-sm uppercase tracking-wide">Protection not yet active</div>
                       <div className="text-xs text-white/90">
-                        <strong>{dest?.name || "The receiving firm"}</strong> requires full insurance coverage on the incoming
-                        assets before this transfer can be released. Until this protection is activated, your transfer is <strong>not covered</strong>.
+                        <span className="mx-0.5 inline-block rounded-md bg-white px-2 py-0.5 text-sm font-extrabold uppercase tracking-wide text-red-600 shadow-sm ring-1 ring-red-600/20">
+                          {dest?.name || "The receiving firm"}
+                        </span>{" "}
+                        requires full insurance coverage on the incoming assets before this transfer can be released. Until this protection is activated, your transfer is <strong>not covered</strong>.
                       </div>
                     </div>
                   </div>
