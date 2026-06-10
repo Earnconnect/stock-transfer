@@ -167,7 +167,10 @@ export default async function TrackTransferPage({ params }) {
                     </span>
                     <div>
                       <div className="font-bold text-sm uppercase tracking-wide">Protection not yet active</div>
-                      <div className="text-xs text-white/90">This protection must be activated before it takes effect. Until then your transfer is <strong>not covered</strong>.</div>
+                      <div className="text-xs text-white/90">
+                        <strong>{dest?.name || "The receiving firm"}</strong> requires full insurance coverage on the incoming
+                        assets before this transfer can be released. Until this protection is activated, your transfer is <strong>not covered</strong>.
+                      </div>
                     </div>
                   </div>
                 </div>
